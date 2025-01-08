@@ -7,7 +7,7 @@ $dbname = "kartenspiel1_db"; // Der Name deiner Datenbank
 
 // Verbindung zur Datenbank herstellen
 $conn = new mysqli($servername, $username, $password, $dbname);
-
+ 
 // Überprüfen, ob die Verbindung erfolgreich war
 if ($conn->connect_error) {
     die("Verbindung zur Datenbank fehlgeschlagen: " . $conn->connect_error);

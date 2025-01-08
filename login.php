@@ -43,7 +43,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION['email'] = $row['email'];
             
             // Weiterleitung zur Startseite (z.B. projekt.php oder start.php)
-            header("Location: start.php");
+            header("Location: abenteuer.php");
             exit();
         } else {
             $error = "Ungültige E-Mail oder Passwort!";
@@ -66,8 +66,15 @@ $conn->close();
     <link rel="stylesheet" href="styles.css">  <!-- CSS-Datei einbinden -->
 </head>
 <body>
+    <!-- Audio im Hintergrund (wird nur einmal abgespielt) -->
+    <audio id="background-audio" preload="auto">
+        <!-- Der Pfad zur Audiodatei -->
+        <source src="Willkommen.mp3" type="audio/mp3">
+        Dein Browser unterstützt das Abspielen von Audio nicht.
+    </audio>
+
     <header>
-        <h1>Willkommen zurück!</h1>
+        <h1>Willkommen!</h1>
     </header>
 
     <main>
@@ -96,5 +103,18 @@ $conn->close();
     <footer>
         <p>&copy; 2025 Trading Card Game - Alle Rechte vorbehalten.</p>
     </footer>
+
+    <script>
+        // JavaScript, um das Audio nur einmal beim ersten Laden der Seite abzuspielen
+        window.onload = function() {
+            var audio = document.getElementById('background-audio');
+            
+            // Prüfen, ob das Audio bereits abgespielt wurde (über sessionStorage)
+            if (!sessionStorage.getItem('audioPlayed')) {
+                audio.play();  // Audio abspielen
+                sessionStorage.setItem('audioPlayed', 'true');  // Markieren, dass das Audio abgespielt wurde
+            }
+        };
+    </script>
 </body>
 </html>

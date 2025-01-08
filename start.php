@@ -19,30 +19,39 @@ if (isset($_POST['logout'])) {
     exit();
 }
 ?>
- 
+
 <!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Start - Trading Card Game</title>
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles1.css"> <!-- Verweis auf das Stylesheet -->
 </head>
 <body>
+    <!-- Wolken-Background -->
+    <div class="clouds">
+        <div class="clouds-1"></div>
+        <div class="clouds-2"></div>
+        <div class="clouds-3"></div>
+    </div>
+
     <header>
-        <h1>Willkommen, <?php echo htmlspecialchars($benutzername); ?>!</h1>
-        <!-- Navigation -->
-        <nav>
-            <ul>
-                <li><a href="start.php">Startseite</a></li>
-                <li><a href="deck.php">Mein Deck</a></li>
-                <li><a href="shop.php">Karten Shop</a></li>
-            </ul>
-        </nav>
-        <!-- Logout-Formular -->
-        <form action="start.php" method="POST">
-            <button type="submit" name="logout" class="btn">Abmelden</button>
-        </form>
+        <div class="container">
+            <h1>Willkommen, <?php echo htmlspecialchars($benutzername); ?>!</h1>
+            <!-- Navigation -->
+            <nav>
+                <ul>
+                    <li><a href="start.php">Startseite</a></li>
+                    <li><a href="deck.php">Mein Deck</a></li>
+                    <li><a href="shop.php">Karten Shop</a></li>
+                </ul>
+            </nav>
+            <!-- Logout-Formular -->
+            <form action="start.php" method="POST">
+                <button type="submit" name="logout" class="btn">Abmelden</button>
+            </form>
+        </div>
     </header>
 
     <main>
@@ -50,6 +59,10 @@ if (isset($_POST['logout'])) {
             <h2>Dein Abenteuer beginnt!</h2>
             <p>Willkommen im Trading Card Game. Hier kannst du dein Abenteuer starten und gegen andere Spieler antreten.</p>
             <p>Wähle eine der Optionen im Menü, um zu deinem Deck zu gehen oder neue Karten zu kaufen.</p>
+            <!-- Los-Button -->
+            <form action="abenteuer.php" method="GET">
+                <button type="submit" class="btn">Los!</button>
+            </form>
         </section>
     </main>
 
