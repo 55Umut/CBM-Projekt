@@ -23,6 +23,47 @@ body {
   position: relative; /* Position für das Hintergrundbild */
   flex: 1; /* Der Body nimmt den gesamten verfügbaren Platz ein */
 }
+p {
+  color: #ffd700;
+}
+/* Abschnittsbasierte Layout-Anpassungen */
+main {
+  display: flex;
+  flex-direction: column; /* Die Sektionen werden untereinander angezeigt */
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+}
+
+/* Sektionen - Jede erhält ein flexibles Layout */
+section {
+  display: flex;
+  justify-content: center; /* Buttons in der Mitte der Sektion */
+  flex-wrap: wrap; /* Erlaubt den Umbruch */
+  gap: 5px; /* Abstand zwischen den Buttons */
+  margin-bottom: 5px; /* Abstand zwischen den Sektionen */
+  width: 50%;
+  max-width: 40%; /* Maximale Breite für bessere Übersicht */
+}
+
+section button {
+  background-color: #787145; /* Gelbe Hintergrundfarbe */
+  color: #333; /* Dunkelgraue Schriftfarbe */
+  font-size: 1.1rem; /* Schriftgröße */
+  padding: 4px 8px; /* Innenabstand */
+  border: none; /* Keine Umrandung */
+  border-radius: 9px; /* Abgerundete Ecken */
+  cursor: pointer; /* Zeigt einen Zeiger, wenn der Button mit der Maus überfahren wird */
+  transition: background-color 0.3s ease, transform 0.3s ease; /* Übergangseffekte für Hintergrundfarbe und Skalierung */
+  margin: 2px; /* Abstand zwischen den Buttons */
+  flex: 1 1 30%; /* Die Buttons nehmen je nach verfügbarer Breite Platz ein, maximal 30% der Zeilenbreite */
+}
+
+/* Hover-Effekte für die Buttons */
+section button:hover {
+  background-color: #e6b800; /* Dunklere Gelbfarbe beim Hover */
+  transform: scale(1.1); /* Leichte Vergrößerung des Buttons */
+}
 
 /* Wolken */
 .clouds {

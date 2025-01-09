@@ -42,7 +42,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION['benutzername'] = $row['benutzername'];
             $_SESSION['email'] = $row['email'];
             
-            // Weiterleitung zur Startseite (z.B. projekt.php oder start.php)
+            // Weiterleitung zur Startseite (z.B. projekt.php oder abenteuer.php)
             header("Location: abenteuer.php");
             exit();
         } else {
@@ -66,9 +66,7 @@ $conn->close();
     <link rel="stylesheet" href="styles.css">  <!-- CSS-Datei einbinden -->
 </head>
 <body>
-    <!-- Audio im Hintergrund (wird nur einmal abgespielt) -->
     <audio id="background-audio" preload="auto">
-        <!-- Der Pfad zur Audiodatei -->
         <source src="Willkommen.mp3" type="audio/mp3">
         Dein Browser unterstützt das Abspielen von Audio nicht.
     </audio>
@@ -105,15 +103,17 @@ $conn->close();
     </footer>
 
     <script>
-        // JavaScript, um das Audio nur einmal beim ersten Laden der Seite abzuspielen
+        // Funktion zum Abspielen des Audios beim Laden der Seite
         window.onload = function() {
             var audio = document.getElementById('background-audio');
-            
-            // Prüfen, ob das Audio bereits abgespielt wurde (über sessionStorage)
-            if (!sessionStorage.getItem('audioPlayed')) {
-                audio.play();  // Audio abspielen
-                sessionStorage.setItem('audioPlayed', 'true');  // Markieren, dass das Audio abgespielt wurde
-            }
+            // Versuchen, das Audio ohne Benutzerinteraktion abzuspielen
+            audio.play().catch(function(error) {
+                // Falls das Abspielen blockiert wurde, simulieren wir eine Benutzerinteraktion
+                var div = document.createElement('div');
+                div.style.display = 'none';
+                document.body.appendChild(div);
+                div.click();
+            });
         };
     </script>
 </body>

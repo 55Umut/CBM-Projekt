@@ -159,7 +159,10 @@ if (isset($_POST['charakter'])) {
         <div class="clouds-2"></div>
         <div class="clouds-3"></div>
     </div>
-
+    <audio id="background-audio" preload="auto">
+        <source src="Codebreakers.mp3".mp3" type="audio/mp3">
+        Dein Browser unterstützt das Abspielen von Audio nicht.
+    </audio>
     <header>
         <h1>Wähle deinen Charakter!</h1>
         <!-- Navigation -->
@@ -195,9 +198,20 @@ if (isset($_POST['charakter'])) {
             </form>
         </section>
     </main>
-
     <footer>
         <p>&copy; 2025 Trading Card Game - Alle Rechte vorbehalten.</p>
     </footer>
+    <script>
+        // Funktion zum Abspielen des Audios beim Laden der Seite
+        window.onload = function() {
+            var audio = document.getElementById('background-audio');
+            audio.play().catch(function(error) {
+                var div = document.createElement('div');
+                div.style.display = 'none';
+                document.body.appendChild(div);
+                div.click();
+            });
+        };
+    </script>
 </body>
 </html>
