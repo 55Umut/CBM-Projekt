@@ -1,0 +1,349 @@
+/* Abschnittsbasierte Layout-Anpassungen */
+main {
+  display: flex;
+  flex-direction: column; /* Die Sektionen werden untereinander angezeigt */
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+}
+
+/* Sektionen - Jede erhält ein flexibles Layout */
+section {
+  display: flex;
+  justify-content: center; /* Buttons in der Mitte der Sektion */
+  flex-wrap: wrap; /* Erlaubt den Umbruch */
+  gap: 5px; /* Abstand zwischen den Buttons */
+  margin-bottom: 5px; /* Abstand zwischen den Sektionen */
+  width: 50%;
+  max-width: 40%; /* Maximale Breite für bessere Übersicht */
+}
+
+section button {
+  background-color: #787145; /* Gelbe Hintergrundfarbe */
+  color: #333; /* Dunkelgraue Schriftfarbe */
+  font-size: 1.1rem; /* Schriftgröße */
+  padding: 4px 8px; /* Innenabstand */
+  border: none; /* Keine Umrandung */
+  border-radius: 9px; /* Abgerundete Ecken */
+  cursor: pointer; /* Zeigt einen Zeiger, wenn der Button mit der Maus überfahren wird */
+  transition: background-color 0.3s ease, transform 0.3s ease; /* Übergangseffekte für Hintergrundfarbe und Skalierung */
+  margin: 2px; /* Abstand zwischen den Buttons */
+  flex: 1 1 30%; /* Die Buttons nehmen je nach verfügbarer Breite Platz ein, maximal 30% der Zeilenbreite */
+}
+
+/* Hover-Effekte für die Buttons */
+section button:hover {
+  background-color: #e6b800; /* Dunklere Gelbfarbe beim Hover */
+  transform: scale(1.1); /* Leichte Vergrößerung des Buttons */
+}
+/* Grundlegende Reset-Stile */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  font-family: "Oswald", sans-serif;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column; /* Flexbox für den gesamten Body */
+}
+
+/* Hintergrund für den Body */
+body {
+  background: linear-gradient(#333, #000);
+  text-align: center;
+  vertical-align: middle;
+  position: relative; /* Position für das Hintergrundbild */
+  flex: 1; /* Der Body nimmt den gesamten verfügbaren Platz ein */
+}
+p {
+  color: #ffd700;
+}
+
+/* Wolken */
+.clouds {
+  opacity: 0.4;
+  pointer-events: none;
+  position: absolute;
+  overflow: hidden;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  color: #ffd700; /* Gelbe Schrift über den Wolken */
+}
+
+.clouds-1,
+.clouds-2,
+.clouds-3 {
+  background-repeat: repeat-x;
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 500px;
+}
+
+.clouds-1 {
+  background-image: url("https://s.cdpn.io/15514/clouds_2.png");
+  animation: clouds-loop-1 20s infinite linear;
+}
+
+.clouds-2 {
+  background-image: url("https://s.cdpn.io/15514/clouds_1.png");
+  animation: clouds-loop-2 15s infinite linear;
+}
+
+.clouds-3 {
+  background-image: url("https://s.cdpn.io/15514/clouds_3.png");
+  animation: clouds-loop-3 17s infinite linear;
+}
+
+/* Cloud Animations */
+@keyframes clouds-loop-1 {
+  to {
+    background-position: -1000px 0;
+  }
+}
+
+@keyframes clouds-loop-2 {
+  to {
+    background-position: -1000px 0;
+  }
+}
+
+@keyframes clouds-loop-3 {
+  to {
+    background-position: -1579px 0;
+  }
+}
+
+/* Allgemeine Stile */
+header {
+  background-color: #333;
+  color: #ffd700; /* Gelbe Schriftfarbe im Header */
+  padding: 20px;
+  text-align: center;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 2.5rem;
+}
+
+nav ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+nav ul li {
+  display: inline;
+  margin: 0 15px;
+}
+
+nav ul li a {
+  color: #ffd700; /* Gelbe Schriftfarbe für Links */
+  text-decoration: none;
+  font-weight: bold;
+}
+
+nav ul li a:hover {
+  text-decoration: underline;
+}
+
+main {
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  height: 100%; /* Füllt den gesamten Bildschirm aus */
+  flex-grow: 1; /* Der Hauptbereich nimmt den gesamten verfügbaren Platz ein */
+  overflow: hidden; /* Verhindert, dass der Inhalt überläuft */
+}
+
+h2 {
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+  text-align: center;
+  color: #ffd700; /* Gelbe Schrift für h2-Überschrift */
+}
+
+#intro-text {
+  font-size: 1.8rem;
+  margin-bottom: 30px; /* Größerer Abstand zum Video */
+  color: #ffd700; /* Gelbe Schriftfarbe für den Intro-Text */
+}
+
+#story-video {
+  display: none; /* Video zunächst unsichtbar */
+  width: 100%;
+  max-width: 640px; /* Responsivität des Videos */
+  height: 360px;
+  margin-top: 30px; /* Abstand zum Text vergrößern */
+}
+
+#skip-button {
+  margin-top: 20px;
+  background-color: #f44336;
+  color: white;
+  padding: 12px 20px;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+#skip-button:hover {
+  background-color: #e53935;
+}
+
+footer {
+  background-color: #333;
+  color: #ffd700; /* Gelbe Schrift im Footer */
+  text-align: center;
+  padding: 10px;
+  margin-top: 40px;
+  position: relative;
+  bottom: 0;
+  width: 100%;
+}
+
+footer p {
+  margin: 0;
+  font-size: 1rem;
+}
+
+/* CHARAKTERE - Container anpassen, um den Bildschirm zu füllen */
+.charaktere-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start; /* Zeilenabstand minimieren */
+  align-items: center;
+  height: 100%; /* Der Container füllt den gesamten `main` Bereich */
+  overflow-y: auto; /* Scrollen falls der Inhalt zu groß ist */
+  width: 100%; /* Maximale Breite */
+}
+
+.charaktere {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr); /* 6 Spalten für die Charaktere */
+  gap: 20px;
+  justify-items: center;
+  align-items: center;
+  width: 100%; /* Volle Breite des Containers */
+  grid-auto-rows: 1fr; /* Jede Zeile hat die gleiche Höhe */
+  max-width: 100%; /* Maximale Breite auf 100% gesetzt */
+}
+
+.charaktere label {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Vertikal zentrieren von Text und Bild */
+  cursor: pointer;
+  position: relative;
+  text-align: center;
+  width: 100%; /* Die Labels nehmen die gesamte Breite der Spalte ein */
+  max-width: 120px; /* Maximale Breite für Labels */
+  color: #ffd700; /* Gelbe Schriftfarbe für die Charakternamen */
+}
+
+.charaktere img {
+  width: 100%; /* Bildgröße passt sich an */
+  height: 120px; /* Feste Höhe für die Bilder */
+  margin-bottom: 10px; /* Abstand zwischen Bild und Name */
+  border-radius: 8px; /* Optional: Runde Ecken für das Bild */
+  object-fit: cover; /* Bild proportional anpassen */
+  transition: transform 0.3s ease;
+}
+
+.charaktere input[type="radio"] {
+  display: none; /* Radio-Buttons unsichtbar machen */
+}
+
+.charaktere input[type="radio"]:checked + label img {
+  border: 3px solid #4caf50; /* Wenn ausgewählt, das Bild umranden */
+}
+
+/* Hover-Effekte für Bilder */
+.charaktere label:hover img {
+  transform: scale(1.1); /* Bild beim Hover leicht vergrößern */
+}
+
+/* Abstand zwischen den Charakteren verringern */
+.charaktere label {
+  display: block; /* Macht jedes Label zu einem Block-Element */
+  margin-bottom: 10px; /* Reduzierter Abstand zwischen den Charakteren */
+  font-size: 1.2rem; /* Optional: Verändert die Schriftgröße für die Charaktere */
+}
+
+/* Optional: Abstand zwischen dem Radio-Button und dem Text */
+.charaktere input {
+  margin-right: 5px; /* Verkleinerter Abstand zwischen dem Radio-Button und dem Text */
+}
+
+.charaktere label {
+  padding: 5px 0; /* Optional: Vergrößert den Abstand nach oben und unten im Label */
+}
+
+/* Medienabfragen für responsives Design */
+
+/* Für kleinere Bildschirme (Smartphones) */
+@media (max-width: 768px) {
+  header h1 {
+    font-size: 2rem; /* Kleinere Schriftgröße für Header */
+  }
+
+  nav ul {
+    text-align: center;
+  }
+
+  nav ul li {
+    display: block; /* Navigationselemente untereinander anzeigen */
+    margin: 10px 0;
+  }
+
+  main {
+    padding: 10px;
+    height: auto; /* Höhe anpassen */
+  }
+
+  #intro-text {
+    font-size: 1.6rem;
+  }
+
+  #story-video {
+    max-width: 100%;
+  }
+
+  footer {
+    padding: 15px;
+  }
+}
+
+/* Für sehr kleine Bildschirme (z.B. Handys im Hochformat) */
+@media (max-width: 480px) {
+  header h1 {
+    font-size: 1.5rem;
+  }
+
+  #story-video {
+    width: 100%;
+    height: auto; /* Video passt sich der Breite des Bildschirms an */
+  }
+
+  .charaktere label {
+    font-size: 1.1rem; /* Kleinere Schrift für Labels */
+  }
+
+  #skip-button {
+    font-size: 1rem;
+    padding: 10px 15px;
+  }
+}

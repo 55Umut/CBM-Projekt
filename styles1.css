@@ -26,44 +26,6 @@ body {
 p {
   color: #ffd700;
 }
-/* Abschnittsbasierte Layout-Anpassungen */
-main {
-  display: flex;
-  flex-direction: column; /* Die Sektionen werden untereinander angezeigt */
-  justify-content: center;
-  align-items: center;
-  margin-top: 20px;
-}
-
-/* Sektionen - Jede erhält ein flexibles Layout */
-section {
-  display: flex;
-  justify-content: center; /* Buttons in der Mitte der Sektion */
-  flex-wrap: wrap; /* Erlaubt den Umbruch */
-  gap: 5px; /* Abstand zwischen den Buttons */
-  margin-bottom: 5px; /* Abstand zwischen den Sektionen */
-  width: 50%;
-  max-width: 40%; /* Maximale Breite für bessere Übersicht */
-}
-
-section button {
-  background-color: #787145; /* Gelbe Hintergrundfarbe */
-  color: #333; /* Dunkelgraue Schriftfarbe */
-  font-size: 1.1rem; /* Schriftgröße */
-  padding: 4px 8px; /* Innenabstand */
-  border: none; /* Keine Umrandung */
-  border-radius: 9px; /* Abgerundete Ecken */
-  cursor: pointer; /* Zeigt einen Zeiger, wenn der Button mit der Maus überfahren wird */
-  transition: background-color 0.3s ease, transform 0.3s ease; /* Übergangseffekte für Hintergrundfarbe und Skalierung */
-  margin: 2px; /* Abstand zwischen den Buttons */
-  flex: 1 1 30%; /* Die Buttons nehmen je nach verfügbarer Breite Platz ein, maximal 30% der Zeilenbreite */
-}
-
-/* Hover-Effekte für die Buttons */
-section button:hover {
-  background-color: #e6b800; /* Dunklere Gelbfarbe beim Hover */
-  transform: scale(1.1); /* Leichte Vergrößerung des Buttons */
-}
 
 /* Wolken */
 .clouds {
@@ -160,53 +122,115 @@ main {
   padding: 20px;
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
+  flex-direction: row; /* Horizontale Anordnung für Charaktere und Highscore */
+  height: 100%;
+  flex-grow: 1;
+  overflow: hidden;
+}
+
+.charaktere-container {
+  display: flex;
   flex-direction: column;
-  height: 100%; /* Füllt den gesamten Bildschirm aus */
-  flex-grow: 1; /* Der Hauptbereich nimmt den gesamten verfügbaren Platz ein */
-  overflow: hidden; /* Verhindert, dass der Inhalt überläuft */
+  justify-content: flex-start;
+  align-items: center;
+  height: 100%;
+  overflow-y: auto;
+  width: 70%; /* 70% der Breite für Charaktere */
+}
+
+.highscore-container {
+  width: auto; /* 30% der Breite für die Highscore-Liste */
+  background-color: #333;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  margin-left: 20px;
 }
 
 h2 {
   font-size: 1.8rem;
   margin-bottom: 20px;
   text-align: center;
-  color: #ffd700; /* Gelbe Schrift für h2-Überschrift */
+  color: #ffd700;
 }
 
-#intro-text {
-  font-size: 1.8rem;
-  margin-bottom: 30px; /* Größerer Abstand zum Video */
-  color: #ffd700; /* Gelbe Schriftfarbe für den Intro-Text */
+/* Highscore-Liste */
+.highscore-container table {
+  width: auto;
+  border-collapse: collapse;
 }
 
-#story-video {
-  display: none; /* Video zunächst unsichtbar */
+.highscore-container th,
+.highscore-container td {
+  padding: 5px;
+  text-align: center;
+  color: #ffd700;
+}
+
+.highscore-container th {
+  background-color: #444;
+}
+
+.highscore-container td {
+  background-color: #333;
+}
+
+.highscore-container tr:nth-child(even) {
+  background-color: #444;
+}
+
+.highscore-container tr:hover {
+  background-color: #555;
+}
+
+.charaktere {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 20px;
+  justify-items: center;
+  align-items: center;
   width: 100%;
-  max-width: 640px; /* Responsivität des Videos */
-  height: 360px;
-  margin-top: 30px; /* Abstand zum Text vergrößern */
+  grid-auto-rows: 1fr;
+  max-width: 100%;
 }
 
-#skip-button {
-  margin-top: 20px;
-  background-color: #f44336;
-  color: white;
-  padding: 12px 20px;
-  border: none;
-  font-size: 1.2rem;
+.charaktere label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   cursor: pointer;
-  border-radius: 5px;
-  transition: background-color 0.3s ease;
+  position: relative;
+  text-align: center;
+  width: 100%;
+  max-width: 120px;
+  color: #ffd700;
 }
 
-#skip-button:hover {
-  background-color: #e53935;
+.charaktere img {
+  width: 100%;
+  height: 120px;
+  margin-bottom: 10px;
+  border-radius: 8px;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.charaktere input[type="radio"] {
+  display: none;
+}
+
+.charaktere input[type="radio"]:checked + label img {
+  border: 3px solid #4caf50;
+}
+
+.charaktere label:hover img {
+  transform: scale(1.1);
 }
 
 footer {
   background-color: #333;
-  color: #ffd700; /* Gelbe Schrift im Footer */
+  color: #ffd700;
   text-align: center;
   padding: 10px;
   margin-top: 40px;
@@ -220,84 +244,10 @@ footer p {
   font-size: 1rem;
 }
 
-/* CHARAKTERE - Container anpassen, um den Bildschirm zu füllen */
-.charaktere-container {
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-start; /* Zeilenabstand minimieren */
-  align-items: center;
-  height: 100%; /* Der Container füllt den gesamten `main` Bereich */
-  overflow-y: auto; /* Scrollen falls der Inhalt zu groß ist */
-  width: 100%; /* Maximale Breite */
-}
-
-.charaktere {
-  display: grid;
-  grid-template-columns: repeat(6, 1fr); /* 6 Spalten für die Charaktere */
-  gap: 20px;
-  justify-items: center;
-  align-items: center;
-  width: 100%; /* Volle Breite des Containers */
-  grid-auto-rows: 1fr; /* Jede Zeile hat die gleiche Höhe */
-  max-width: 100%; /* Maximale Breite auf 100% gesetzt */
-}
-
-.charaktere label {
-  display: flex;
-  flex-direction: column;
-  align-items: center; /* Vertikal zentrieren von Text und Bild */
-  cursor: pointer;
-  position: relative;
-  text-align: center;
-  width: 100%; /* Die Labels nehmen die gesamte Breite der Spalte ein */
-  max-width: 120px; /* Maximale Breite für Labels */
-  color: #ffd700; /* Gelbe Schriftfarbe für die Charakternamen */
-}
-
-.charaktere img {
-  width: 100%; /* Bildgröße passt sich an */
-  height: 120px; /* Feste Höhe für die Bilder */
-  margin-bottom: 10px; /* Abstand zwischen Bild und Name */
-  border-radius: 8px; /* Optional: Runde Ecken für das Bild */
-  object-fit: cover; /* Bild proportional anpassen */
-  transition: transform 0.3s ease;
-}
-
-.charaktere input[type="radio"] {
-  display: none; /* Radio-Buttons unsichtbar machen */
-}
-
-.charaktere input[type="radio"]:checked + label img {
-  border: 3px solid #4caf50; /* Wenn ausgewählt, das Bild umranden */
-}
-
-/* Hover-Effekte für Bilder */
-.charaktere label:hover img {
-  transform: scale(1.1); /* Bild beim Hover leicht vergrößern */
-}
-
-/* Abstand zwischen den Charakteren verringern */
-.charaktere label {
-  display: block; /* Macht jedes Label zu einem Block-Element */
-  margin-bottom: 10px; /* Reduzierter Abstand zwischen den Charakteren */
-  font-size: 1.2rem; /* Optional: Verändert die Schriftgröße für die Charaktere */
-}
-
-/* Optional: Abstand zwischen dem Radio-Button und dem Text */
-.charaktere input {
-  margin-right: 5px; /* Verkleinerter Abstand zwischen dem Radio-Button und dem Text */
-}
-
-.charaktere label {
-  padding: 5px 0; /* Optional: Vergrößert den Abstand nach oben und unten im Label */
-}
-
 /* Medienabfragen für responsives Design */
-
-/* Für kleinere Bildschirme (Smartphones) */
 @media (max-width: 768px) {
   header h1 {
-    font-size: 2rem; /* Kleinere Schriftgröße für Header */
+    font-size: 2rem;
   }
 
   nav ul {
@@ -305,21 +255,23 @@ footer p {
   }
 
   nav ul li {
-    display: block; /* Navigationselemente untereinander anzeigen */
+    display: block;
     margin: 10px 0;
   }
 
   main {
     padding: 10px;
-    height: auto; /* Höhe anpassen */
+    flex-direction: column;
   }
 
-  #intro-text {
-    font-size: 1.6rem;
+  .charaktere-container {
+    width: 100%;
   }
 
-  #story-video {
-    max-width: 100%;
+  .highscore-container {
+    width: auto;
+    margin-left: 0;
+    margin-top: 20px;
   }
 
   footer {
@@ -327,23 +279,34 @@ footer p {
   }
 }
 
-/* Für sehr kleine Bildschirme (z.B. Handys im Hochformat) */
 @media (max-width: 480px) {
   header h1 {
     font-size: 1.5rem;
   }
 
-  #story-video {
-    width: 100%;
-    height: auto; /* Video passt sich der Breite des Bildschirms an */
-  }
-
   .charaktere label {
-    font-size: 1.1rem; /* Kleinere Schrift für Labels */
+    font-size: 1.1rem;
   }
 
   #skip-button {
     font-size: 1rem;
     padding: 10px 15px;
   }
+}
+
+/* Button */
+button {
+  width: auto;
+  padding: auto;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+button:hover {
+  background-color: #45a049;
 }

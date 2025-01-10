@@ -1,0 +1,307 @@
+/* Grundlegende Reset-Stile */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  font-family: "Oswald", sans-serif;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Hintergrund für den Body */
+body {
+  background: linear-gradient(#333, #000);
+  text-align: center;
+  vertical-align: middle;
+  position: relative;
+  flex: 1;
+}
+
+/* Wolken */
+.clouds {
+  opacity: 0.4;
+  pointer-events: none;
+  position: absolute;
+  overflow: hidden;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+}
+
+.clouds-1,
+.clouds-2,
+.clouds-3 {
+  background-repeat: repeat-x;
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 500px;
+}
+
+.clouds-1 {
+  background-image: url("https://s.cdpn.io/15514/clouds_2.png");
+  animation: clouds-loop-1 20s infinite linear;
+}
+
+.clouds-2 {
+  background-image: url("https://s.cdpn.io/15514/clouds_1.png");
+  animation: clouds-loop-2 15s infinite linear;
+}
+
+.clouds-3 {
+  background-image: url("https://s.cdpn.io/15514/clouds_3.png");
+  animation: clouds-loop-3 17s infinite linear;
+}
+
+/* Cloud Animations */
+@keyframes clouds-loop-1 {
+  to {
+    background-position: -1000px 0;
+  }
+}
+
+@keyframes clouds-loop-2 {
+  to {
+    background-position: -1000px 0;
+  }
+}
+
+@keyframes clouds-loop-3 {
+  to {
+    background-position: -1579px 0;
+  }
+}
+
+/* Allgemeine Stile */
+header {
+  background-color: transparent; /* Header transparent */
+  color: #ffd700; /* Textfarbe bleibt gelb für besseren Kontrast */
+  padding: 10px 20px;
+  text-align: center;
+  position: sticky; /* Setze Position auf sticky */
+  top: 0; /* Fixiere den Header am oberen Rand */
+  width: 100%;
+  z-index: 10;
+  border-radius: 5px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); /* Etwas Schatten für besseren Kontrast */
+}
+
+header h1 {
+  margin: 0;
+  font-size: 2.5rem;
+  padding: 5px 20px;
+}
+
+/* Spielfeld Container */
+.game-container {
+  position: relative;
+  width: 100%;
+  height: calc(100vh - 160px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Gegnerbereich */
+.opponent {
+  width: 80%;
+  background-color: transparent; /* Gegnerbereich transparent */
+  color: white;
+  padding: 20px;
+  border-radius: 10px;
+  text-align: center;
+  position: relative;
+  margin-bottom: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); /* Etwas Schatten für besseren Kontrast */
+}
+
+/* Layout für die Angriffe und das Bossbild */
+.boss-layout {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+/* Links: Angriffe */
+.attacks-left,
+.attacks-right {
+  width: 45%; /* Beide Bereiche nehmen jeweils 45% der Breite ein */
+  padding: 10px;
+}
+
+.boss-image-container {
+  width: 15%; /* Das Bild des Bosses nimmt 15% der Breite ein */
+  text-align: center;
+}
+
+.attack {
+  font-size: 1.1rem;
+  color: #ffd700;
+  margin: 10px 0;
+}
+
+/* Boss-Bildgröße anpassen */
+.boss-image {
+  max-width: 350px; /* Erhöht die maximale Breite des Bossbildes */
+  height: auto;
+  margin-bottom: 15px;
+}
+
+/* Gesundheitsbalken */
+.health-bar-container {
+  margin-bottom: 20px;
+}
+
+.health-bar--outline {
+  width: 100%;
+  height: 20px;
+  background: #444;
+  border-radius: 10px;
+  margin-bottom: 5px;
+}
+
+.health-bar--border {
+  position: relative;
+  height: 100%;
+}
+
+.health-bar--background {
+  background: #e74c3c;
+  height: 100%;
+  border-radius: 10px;
+  width: 100%;
+}
+
+.health-bar--health {
+  height: 100%;
+  background: #2ecc71;
+  border-radius: 10px;
+}
+
+.health-indicator p {
+  margin-top: 10px;
+}
+
+/* Entfernt den Hintergrund beim Bossnamen und stellt ihn fett und blau dar */
+.hs-wrapper.gold {
+  margin: 5px 0;
+  display: inline-block;
+  padding: 0; /* Kein zusätzlicher Abstand */
+}
+
+.hs-text.gold {
+  font-weight: bold; /* Der Bossname wird fett dargestellt */
+  color: #3498db; /* Blau für den Bossnamen */
+  padding: 5px 20px; /* Padding für etwas Abstand */
+}
+
+/* Spielerbereich */
+.player {
+  width: 80%;
+  background-color: rgba(0, 0, 0, 0); /* Transparent */
+  color: white;
+  padding: 10px;
+  border-radius: 10px;
+  text-align: center;
+  position: relative; /* Position relativ, damit der Footer nicht überlappt */
+  z-index: 10;
+  margin-bottom: 20px; /* Abstand zum Footer */
+}
+
+.player-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.player-layout {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.attacks-left,
+.attacks-right {
+  width: 45%; /* Beide Bereiche nehmen jeweils 45% der Breite ein */
+  padding: 10px;
+}
+
+.player-image-container {
+  width: 15%; /* Das Bild des Charakters nimmt 15% der Breite ein */
+  text-align: center;
+}
+
+.player-image {
+  max-width: 150px;
+  height: auto;
+  margin-bottom: 15px;
+}
+
+.attack {
+  font-size: 1.1rem;
+  color: #ffd700;
+  margin: 10px 0;
+}
+
+.health-bar-container {
+  margin-bottom: 20px;
+}
+
+.health-bar--outline {
+  width: 100%;
+  height: 20px;
+  background: #444;
+  border-radius: 10px;
+  margin-bottom: 5px;
+}
+
+.health-bar--border {
+  position: relative;
+  height: 100%;
+}
+
+.health-bar--background {
+  background: #e74c3c;
+  height: 100%;
+  border-radius: 10px;
+  width: 100%;
+}
+
+.health-bar--health {
+  height: 100%;
+  background: #2ecc71;
+  border-radius: 10px;
+}
+
+.health-indicator p {
+  margin-top: 10px;
+}
+
+/* Footer */
+footer {
+  background-color: transparent; /* Footer transparent */
+  color: #ffd700; /* Textfarbe bleibt gelb */
+  text-align: center;
+  padding: 10px;
+  position: relative;
+  bottom: 0;
+  width: 100%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); /* Etwas Schatten für besseren Kontrast */
+}
+
+footer p {
+  margin: 0;
+  font-size: 1rem;
+}

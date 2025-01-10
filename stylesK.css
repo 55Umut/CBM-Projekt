@@ -1,0 +1,302 @@
+/* Grundlegende Reset-Stile */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  font-family: "Oswald", sans-serif;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column; /* Flexbox für den gesamten Body */
+}
+
+/* Hintergrund für den Body */
+body {
+  background: linear-gradient(#333, #000);
+  text-align: center;
+  vertical-align: middle;
+  position: relative; /* Position für das Hintergrundbild */
+  flex: 1; /* Der Body nimmt den gesamten verfügbaren Platz ein */
+}
+p {
+  color: #ffd700;
+}
+
+/* Wolken */
+.clouds {
+  opacity: 0.4;
+  pointer-events: none;
+  position: absolute;
+  overflow: hidden;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  color: #ffd700; /* Gelbe Schrift über den Wolken */
+}
+
+.clouds-1,
+.clouds-2,
+.clouds-3 {
+  background-repeat: repeat-x;
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 500px;
+}
+
+.clouds-1 {
+  background-image: url("https://s.cdpn.io/15514/clouds_2.png");
+  animation: clouds-loop-1 20s infinite linear;
+}
+
+.clouds-2 {
+  background-image: url("https://s.cdpn.io/15514/clouds_1.png");
+  animation: clouds-loop-2 15s infinite linear;
+}
+
+.clouds-3 {
+  background-image: url("https://s.cdpn.io/15514/clouds_3.png");
+  animation: clouds-loop-3 17s infinite linear;
+}
+
+/* Cloud Animations */
+@keyframes clouds-loop-1 {
+  to {
+    background-position: -1000px 0;
+  }
+}
+
+@keyframes clouds-loop-2 {
+  to {
+    background-position: -1000px 0;
+  }
+}
+
+@keyframes clouds-loop-3 {
+  to {
+    background-position: -1579px 0;
+  }
+}
+
+/* Allgemeine Stile */
+header {
+  background-color: #333;
+  color: #ffd700; /* Gelbe Schriftfarbe im Header */
+  padding: 20px;
+  text-align: center;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 2.5rem;
+}
+
+nav ul {
+  list-style-type: none;
+  padding: 0;
+  font-size: 1.2rem;
+}
+
+nav ul li {
+  display: inline;
+  margin: 0 15px;
+}
+
+nav ul li a {
+  color: #ffd700; /* Gelbe Schriftfarbe für Links */
+  text-decoration: none;
+  font-weight: bold;
+}
+
+nav ul li a:hover {
+  text-decoration: underline;
+}
+
+main {
+  padding: 20px;
+  display: flex;
+  flex-direction: column; /* Karussells untereinander anordnen */
+  justify-content: center; /* Horizontale Zentrierung */
+  align-items: center; /* Vertikale Zentrierung */
+  height: 100vh;
+  flex-grow: 1;
+  overflow: hidden;
+}
+
+h2 {
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+  text-align: center;
+  color: #ffd700;
+}
+
+footer {
+  background-color: #333;
+  color: #ffd700;
+  text-align: center;
+  padding: 10px;
+  margin-top: 40px;
+  position: relative;
+  bottom: 0;
+  width: 100%;
+}
+
+footer p {
+  margin: 0;
+  font-size: 1rem;
+}
+
+/* Karussell-Stile */
+.container {
+  position: relative;
+  width: 320px;
+  height: 320px; /* Höhe des Karussells definieren */
+  margin: 30px auto; /* Abstand zwischen den Karussells */
+  perspective: 1000px; /* Perspektive für den 3D-Effekt */
+}
+
+.carousel {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  animation: rotate360 60s infinite linear;
+}
+
+.carousel__face {
+  position: absolute;
+  width: 300px;
+  height: 187px;
+  top: 20px;
+  left: 10px;
+  right: 10px;
+  background-size: cover;
+  box-shadow: inset 0 0 0 2000px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+span {
+  margin: auto;
+  font-size: 2rem;
+  color: #fff;
+}
+
+/* Bestimmte Positionen für jede "Seite" im Karussell */
+.carousel__face:nth-child(1) {
+  background-image: url("int.png");
+  transform: rotateY(0deg) translateZ(430px);
+}
+
+.carousel__face:nth-child(2) {
+  background-image: url("intr.png");
+  transform: rotateY(40deg) translateZ(430px);
+}
+
+.carousel__face:nth-child(3) {
+  background-image: url("intro.png");
+  transform: rotateY(80deg) translateZ(430px);
+}
+
+.carousel__face:nth-child(4) {
+  background-image: url("intro2.png");
+  transform: rotateY(120deg) translateZ(430px);
+}
+
+.carousel__face:nth-child(5) {
+  background-image: url("intro3.png");
+  transform: rotateY(160deg) translateZ(430px);
+}
+
+.carousel__face:nth-child(6) {
+  background-image: url("intro4.png");
+  transform: rotateY(200deg) translateZ(430px);
+}
+
+.carousel__face:nth-child(7) {
+  background-image: url("intro5.png");
+  transform: rotateY(240deg) translateZ(430px);
+}
+
+.carousel__face:nth-child(8) {
+  background-image: url("intro6.png");
+  transform: rotateY(280deg) translateZ(430px);
+}
+
+.carousel__face:nth-child(9) {
+  background-image: url("intro7.png");
+  transform: rotateY(320deg) translateZ(430px);
+}
+
+/* Karussell-Rotations-Animation */
+@keyframes rotate360 {
+  from {
+    transform: rotateY(0deg);
+  }
+  to {
+    transform: rotateY(-360deg);
+  }
+}
+
+/* Versteckt das untere Karussell */
+#lower-carousel {
+  display: none; /* Standardmäßig versteckt */
+}
+
+/* Wenn das Karussell aktiviert wird, zeigen wir es an */
+#upper-carousel {
+  display: block; /* Das obere Karussell ist standardmäßig sichtbar */
+}
+
+/* Allgemeine Button-Stile */
+button {
+  width: auto; /* Automatische Breite, basierend auf dem Inhalt */
+  padding: 4px 8px; /* Angemessenes Padding für einen angenehmen Button */
+  background-color: #4caf50; /* Grüne Hintergrundfarbe */
+  color: white; /* Weiße Schriftfarbe */
+  border: none; /* Kein Rahmen */
+  border-radius: 8px; /* Sanfte Ecken mit einem Radius von 8px */
+  font-size: 1.2rem; /* Schriftgröße */
+  font-weight: 600; /* Leicht fett für eine bessere Lesbarkeit */
+  text-align: center; /* Textzentrierung */
+  cursor: pointer; /* Zeiger-Cursor beim Überfahren */
+  transition: background-color 0.3s, transform 0.2s ease; /* Übergang für Hintergrundfarbe und leichte Transformation */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Leichter Schatten für Tiefenwirkung */
+}
+
+/* Hover-Effekt */
+button:hover {
+  background-color: #45a049; /* Etwas dunklere grüne Farbe bei Hover */
+  transform: translateY(-3px); /* Leichte Anhebung des Buttons */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Schattenerhöhung beim Hover */
+}
+
+/* Aktivierte Buttons */
+button:active {
+  background-color: #388e3c; /* Noch dunklerer Grünton bei Klick */
+  transform: translateY(1px); /* Leichte Senkung des Buttons */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15); /* Schatten reduzieren bei Aktivierung */
+}
+
+/* Deaktivierte Buttons */
+button.disabled {
+  background-color: #bdbdbd; /* Graue Hintergrundfarbe */
+  color: #757575; /* Dunkelgraue Schriftfarbe */
+  cursor: not-allowed; /* Verhindert den Mauscursor-Wechsel */
+  pointer-events: none; /* Verhindert Klicks */
+  box-shadow: none; /* Kein Schatten */
+}
+
+/* Button für "disabled" mit Hintergrundveränderung */
+button.disabled:hover {
+  background-color: #bdbdbd; /* Keine Hover-Farbe, da bereits deaktiviert */
+  transform: none; /* Keine Transformation */
+}

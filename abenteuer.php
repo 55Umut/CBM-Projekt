@@ -1,4 +1,4 @@
-<?php
+<?php 
 session_start();
 
 // Überprüfen, ob der Benutzer eingeloggt ist
@@ -39,6 +39,22 @@ if ($result->num_rows > 0) {
     echo "Keine Charaktere gefunden.";
 }
 
+// Abfrage der Top 5 Benutzer nach Punkten, sortiert nach der höchsten Punktzahl
+$sql_highscore = "SELECT benutzername, registriert_am, punkte FROM nutzer ORDER BY punkte DESC LIMIT 5";
+$result_highscore = $conn->query($sql_highscore);
+
+// Array für die Highscore-Daten
+$highscores = [];
+
+if ($result_highscore->num_rows > 0) {
+    // Ergebnisse in das Array laden
+    while($row = $result_highscore->fetch_assoc()) {
+        $highscores[] = $row;
+    }
+} else {
+    echo "Keine Highscores gefunden.";
+}
+
 $conn->close();
 
 // Charakterauswahl-Funktion
@@ -54,101 +70,39 @@ if (isset($_POST['charakter'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Abenteuer - Trading Card Game</title>
+    <title>Codebreakers - Battle of Minds</title>
     <link rel="stylesheet" href="styles1.css"> <!-- Verweis auf die angepasste CSS-Datei -->
     <style>
-        /* Zusätzliche CSS-Regeln für das Layout der Charaktere */
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-        }
-
-        /* Der Charakterbereich soll den gesamten Bildschirm füllen */
-        .charaktere-container {
+        /* Zusätzliche CSS-Regeln für das Layout */
+        .container {
             display: flex;
-            flex-direction: column;
-            justify-content: space-between; /* Verteile Platz zwischen den Charakteren und Footer */
-            height: calc(100vh - 140px); /* 100% Höhe minus Header und Footer */
-            padding: 20px;
-            overflow-y: auto; /* Scrollen falls der Inhalt zu groß ist */
-        }
-
-        .charaktere {
-            display: grid;
-            grid-template-columns: repeat(6, 1fr); /* 6 Spalten */
+            justify-content: space-between;
+            align-items: flex-start;
             gap: 20px;
-            margin-top: 30px;
-            justify-items: center;
-            align-items: center;
-            flex: 1; /* Der Charakterbereich nimmt den verfügbaren Platz ein */
         }
-
-        .charaktere label {
-            display: flex;
-            flex-direction: column;
-            align-items: center; /* Vertikal zentrieren von Text und Bild */
-            cursor: pointer;
-            position: relative;
-            text-align: center;
-            width: 100%;
-            max-width: 150px; /* Maximale Breite für jedes Label */
-            transition: transform 0.3s ease;
+        .charaktere-container {
+            flex: 0 0 70%;
         }
-
-        .charaktere img {
-            width: 100%;  /* Bildgröße an die Breite des Containers anpassen */
-            height: 150px; /* Bildhöhe festgelegt */
-            margin-bottom: 10px; /* Abstand zwischen Bild und Name */
-            border-radius: 8px; /* Runde Ecken für das Bild */
-            object-fit: cover; /* Bild proportional anpassen */
-            transition: transform 0.3s ease;
-        }
-
-        .charaktere input[type="radio"] {
-            display: none; /* Radio-Buttons unsichtbar machen */
-        }
-
-        .charaktere input[type="radio"]:checked + label img {
-            border: 3px solid #4CAF50; /* Wenn ausgewählt, das Bild umranden */
-        }
-
-        /* Hover-Effekte für Bilder */
-        .charaktere label:hover img {
-            transform: scale(1.05); /* Bild beim Hover leicht vergrößern */
-        }
-
-        /* Bestätigungsbutton */
-        .btn {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 20px;
-            font-size: 1.2em;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            margin-top: 30px;
-            transition: background-color 0.3s;
-        }
-
-        .btn:hover {
-            background-color: #45a049;
-        }
-
-        footer {
+        .highscore-container {
+            flex: 0 0 25%;
             background-color: #333;
-            color: white;
-            text-align: center;
             padding: 10px;
-            margin-top: 40px;
-            position: relative;
-            bottom: 0;
-            width: 100%;
+            border-radius: 8px;
+            color: #ffd700;
         }
-
-        footer p {
-            margin: 0;
-            font-size: 1rem;
+        .highscore-container table {
+            width: 100%;
+            color: #ffd700;
+            border-collapse: collapse;
+        }
+        .highscore-container table th, .highscore-container table td {
+            padding: 8px;
+            text-align: center;
+            border: 1px solid #fff;
+        }
+        .highscore-container table caption {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
         }
     </style>
 </head>
@@ -159,10 +113,6 @@ if (isset($_POST['charakter'])) {
         <div class="clouds-2"></div>
         <div class="clouds-3"></div>
     </div>
-    <audio id="background-audio" preload="auto">
-        <source src="Codebreakers.mp3".mp3" type="audio/mp3">
-        Dein Browser unterstützt das Abspielen von Audio nicht.
-    </audio>
     <header>
         <h1>Wähle deinen Charakter!</h1>
         <!-- Navigation -->
@@ -180,38 +130,66 @@ if (isset($_POST['charakter'])) {
     </header>
 
     <main>
-        <section class="charaktere-container">
-            <h2>Wähle einen der folgenden Charaktere:</h2>
-            <form action="abenteuer.php" method="POST">
-                <div class="charaktere">
-                    <?php foreach ($charaktere as $charakter): ?>
-                        <div>
-                            <input type="radio" name="charakter" id="charakter_<?php echo $charakter['id']; ?>" value="<?php echo $charakter['name']; ?>" required>
-                            <label for="charakter_<?php echo $charakter['id']; ?>">
-                                <span><?php echo $charakter['name']; ?></span>
-                                <img src="<?php echo $charakter['bild_url']; ?>" alt="Bild von <?php echo $charakter['name']; ?>">
-                            </label>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-                <button type="submit" class="btn">Bestätigen</button>
-            </form>
-        </section>
+        <div class="container">
+            <!-- Charakter Auswahl -->
+            <section class="charaktere-container">
+                <h2>Wähle einen der folgenden Charaktere:</h2>
+                <form action="abenteuer.php" method="POST">
+                    <div class="charaktere">
+                        <?php foreach ($charaktere as $charakter): ?>
+                            <div>
+                                <input type="radio" name="charakter" id="charakter_<?php echo $charakter['id']; ?>" value="<?php echo $charakter['name']; ?>" required>
+                                <label for="charakter_<?php echo $charakter['id']; ?>">
+                                    <span><?php echo $charakter['name']; ?></span>
+                                    <img src="<?php echo $charakter['bild_url']; ?>" alt="Bild von <?php echo $charakter['name']; ?>">
+                                </label>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                    <button type="submit" class="btn">Bestätigen</button>
+                </form>
+            </section>
+
+            <!-- Highscore Tabelle -->
+            <section class="highscore-container">
+                <h2>Highscore</h2>
+                <table>
+                    <caption>Punkte</caption>
+                    <thead>
+                        <tr>
+                            <th>Position</th>
+                            <th>Name</th>
+                            <th>Datum</th>
+                            <th>Punkte</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php
+                        // Ausgabe der Highscore-Daten
+                        if (count($highscores) > 0) {
+                            $position = 1; // Startposition für das Ranking
+                            foreach ($highscores as $highscore) {
+                                $datum = new DateTime($highscore['registriert_am']);
+                                echo "<tr>";
+                                echo "<td>" . $position . "</td>";
+                                echo "<td>" . htmlspecialchars($highscore['benutzername']) . "</td>";
+                                echo "<td>" . $datum->format('d.m.Y') . "</td>";
+                                echo "<td>" . $highscore['punkte'] . "</td>";
+                                echo "</tr>";
+                                $position++;
+                            }
+                        } else {
+                            echo "<tr><td colspan='4'>Keine Highscores vorhanden.</td></tr>";
+                        }
+                        ?>
+                    </tbody>
+                </table>
+            </section>
+        </div>
     </main>
+
     <footer>
         <p>&copy; 2025 Trading Card Game - Alle Rechte vorbehalten.</p>
     </footer>
-    <script>
-        // Funktion zum Abspielen des Audios beim Laden der Seite
-        window.onload = function() {
-            var audio = document.getElementById('background-audio');
-            audio.play().catch(function(error) {
-                var div = document.createElement('div');
-                div.style.display = 'none';
-                document.body.appendChild(div);
-                div.click();
-            });
-        };
-    </script>
 </body>
 </html>
