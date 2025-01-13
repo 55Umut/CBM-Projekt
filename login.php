@@ -12,7 +12,7 @@ $conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
     die("Verbindung zur Datenbank fehlgeschlagen: " . $conn->connect_error);
 }
- 
+
 $error = "";
 $success = "";
 
@@ -22,34 +22,52 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST['email'];
     $passwort = $_POST['password'];
 
-    // Überprüfen, ob die E-Mail und das Passwort korrekt sind
-    $sql = "SELECT * FROM nutzer WHERE email = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    // Starten einer Transaktion
+    $conn->begin_transaction();
 
-    // Falls Benutzer gefunden wurde
-    if ($result->num_rows > 0) {
-        // Daten des Benutzers aus der Datenbank holen
-        $row = $result->fetch_assoc();
-        
-        // Überprüfen, ob das eingegebene Passwort mit dem gehashten Passwort übereinstimmt
-        if (password_verify($passwort, $row['passwort'])) {
-            // Erfolg: Benutzer eingeloggt, Session starten und zum Dashboard weiterleiten
-            session_start();
-            $_SESSION['user_id'] = $row['id'];
-            $_SESSION['benutzername'] = $row['benutzername'];
-            $_SESSION['email'] = $row['email'];
+    try {
+        // Überprüfen, ob die E-Mail und das Passwort korrekt sind
+        $sql = "SELECT * FROM nutzer WHERE email = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        // Falls Benutzer gefunden wurde
+        if ($result->num_rows > 0) {
+            // Daten des Benutzers aus der Datenbank holen
+            $row = $result->fetch_assoc();
             
-            // Weiterleitung zur Startseite (z.B. projekt.php oder abenteuer.php)
-            header("Location: abenteuer.php");
-            exit();
+            // Überprüfen, ob das eingegebene Passwort mit dem gehashten Passwort übereinstimmt
+            if (password_verify($passwort, $row['passwort'])) {
+                // Erfolg: Benutzer eingeloggt, Session starten und zum Dashboard weiterleiten
+                session_start();
+                $_SESSION['user_id'] = $row['id'];
+                $_SESSION['benutzername'] = $row['benutzername'];
+                $_SESSION['email'] = $row['email'];
+                
+                // Commit der Transaktion, falls alles erfolgreich war
+                $conn->commit();
+
+                // Weiterleitung zur Startseite (z.B. projekt.php oder abenteuer.php)
+                header("Location: abenteuer.php");
+                exit();
+            } else {
+                $error = "Ungültige E-Mail oder Passwort!";
+            }
         } else {
             $error = "Ungültige E-Mail oder Passwort!";
         }
-    } else {
-        $error = "Benutzer nicht gefunden!";
+
+        // Wenn ein Fehler auftritt, Transaktion zurückrollen
+        if (!empty($error)) {
+            $conn->rollback();
+        }
+
+    } catch (Exception $e) {
+        // Falls ein Fehler auftritt, wird die Transaktion zurückgerollt
+        $conn->rollback();
+        $error = "Ein Fehler ist aufgetreten. Bitte versuche es später erneut.";
     }
 }
 

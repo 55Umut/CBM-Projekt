@@ -23,36 +23,50 @@ if ($conn->connect_error) {
     die("Verbindung zur Datenbank fehlgeschlagen: " . $conn->connect_error);
 }
 
-// Liste der Charaktere aus der Datenbank abrufen (mit Bild-URL)
-$sql = "SELECT id, name, bild_url FROM charaktere"; // Angenommen, die Tabelle heißt "charaktere"
-$result = $conn->query($sql);
+// Starten einer Transaktion
+$conn->begin_transaction();
 
-// Array für die Charaktere
-$charaktere = [];
+try {
+    // Liste der Charaktere aus der Datenbank abrufen (mit Bild-URL)
+    $sql = "SELECT id, name, bild_url FROM charaktere"; // Angenommen, die Tabelle heißt "charaktere"
+    $result = $conn->query($sql);
 
-if ($result->num_rows > 0) {
-    // Ergebnisse in das Array laden
-    while($row = $result->fetch_assoc()) {
-        $charaktere[] = $row;
+    // Array für die Charaktere
+    $charaktere = [];
+
+    if ($result->num_rows > 0) {
+        // Ergebnisse in das Array laden
+        while($row = $result->fetch_assoc()) {
+            $charaktere[] = $row;
+        }
+    } else {
+        echo "Keine Charaktere gefunden.";
     }
-} else {
-    echo "Keine Charaktere gefunden.";
-}
 
-// Abfrage der Top 5 Benutzer nach Punkten, sortiert nach der höchsten Punktzahl
-$sql_highscore = "SELECT benutzername, registriert_am, punkte FROM nutzer ORDER BY punkte DESC LIMIT 5";
-$result_highscore = $conn->query($sql_highscore);
+    // Abfrage der Top 5 Benutzer nach Punkten, sortiert nach der höchsten Punktzahl
+    $sql_highscore = "SELECT benutzername, registriert_am, punkte FROM nutzer ORDER BY punkte DESC LIMIT 5";
+    $result_highscore = $conn->query($sql_highscore);
 
-// Array für die Highscore-Daten
-$highscores = [];
+    // Array für die Highscore-Daten
+    $highscores = [];
 
-if ($result_highscore->num_rows > 0) {
-    // Ergebnisse in das Array laden
-    while($row = $result_highscore->fetch_assoc()) {
-        $highscores[] = $row;
+    if ($result_highscore->num_rows > 0) {
+        // Ergebnisse in das Array laden
+        while($row = $result_highscore->fetch_assoc()) {
+            $highscores[] = $row;
+        }
+    } else {
+        echo "Keine Highscores gefunden.";
     }
-} else {
-    echo "Keine Highscores gefunden.";
+
+    // Commit der Transaktion
+    $conn->commit();
+    
+} catch (Exception $e) {
+    // Falls ein Fehler auftritt, wird die Transaktion zurückgerollt
+    $conn->rollback();
+    echo "Ein Fehler ist aufgetreten. Bitte versuche es später erneut.";
+    exit();
 }
 
 $conn->close();

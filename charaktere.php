@@ -1,6 +1,5 @@
 <?php
-// Session starten und Datenbank einbinden
-require_once 'config.php';
+
 
 // Spielerklasse (Charakter)
 class Charakter {

@@ -59,61 +59,38 @@ $username = "root";
 $password = "";
 $dbname = "kartenspiel1_db";
 
-// Funktion zum Erstellen einer Datenbankverbindung
-function createDbConnection($servername, $username, $password, $dbname) {
-    $conn = new mysqli($servername, $username, $password, $dbname);
-    if ($conn->connect_error) {
-        die("Verbindung fehlgeschlagen: " . $conn->connect_error);
-    }
-    return $conn;
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+if ($conn->connect_error) {
+    die("Verbindung fehlgeschlagen: " . $conn->connect_error);
 }
 
-// Sichere SQL-Abfrage zur Auswahl des Charakters
-$conn = createDbConnection($servername, $username, $password, $dbname);
+$charakterQuery = "SELECT * FROM charaktere WHERE name = '$charakter_name'";
+$result_charakter = $conn->query($charakterQuery);
 
-// Start der Transaktion
-$conn->begin_transaction();
+if ($result_charakter->num_rows > 0) {
+    $charakter = $result_charakter->fetch_assoc();
+    $charakter_name = $charakter['name'];
+    $charakter_angriff1 = $charakter['standardangriff1'];
+    $charakter_schaden1 = $charakter['schaden1'];
+    $charakter_angriff2 = $charakter['standardangriff2'];
+    $charakter_schaden2 = $charakter['schaden2'];
+    $charakter_angriff3 = $charakter['standardangriff3'];
+    $charakter_schaden3 = $charakter['schaden3'];
+    $charakter_spezialangriff = $charakter['spezialangriff'];
+    $charakter_schaden_spezial = $charakter['schaden_spezial'];
+    $charakter_bild_url = $charakter['bild_url'];
+    $charakter_lebenspunkte = $charakter['leben']; // Verwende "leben" statt "lebenspunkte" aus der DB
 
-try {
-    // Sichere SQL-Abfrage zur Auswahl des Charakters
-    $charakterQuery = $conn->prepare("SELECT * FROM charaktere WHERE name = ?");
-    $charakterQuery->bind_param("s", $charakter_name);
-    $charakterQuery->execute();
-    $result_charakter = $charakterQuery->get_result();
-
-    if ($result_charakter->num_rows > 0) {
-        $charakter = $result_charakter->fetch_assoc();
-        $charakter_name = $charakter['name'];
-        $charakter_angriff1 = $charakter['standardangriff1'];
-        $charakter_schaden1 = $charakter['schaden1'];
-        $charakter_angriff2 = $charakter['standardangriff2'];
-        $charakter_schaden2 = $charakter['schaden2'];
-        $charakter_angriff3 = $charakter['standardangriff3'];
-        $charakter_schaden3 = $charakter['schaden3'];
-        $charakter_spezialangriff = $charakter['spezialangriff'];
-        $charakter_schaden_spezial = $charakter['schaden_spezial'];
-        $charakter_bild_url = $charakter['bild_url'];
-        $charakter_lebenspunkte = $charakter['leben']; // Verwende "leben" statt "lebenspunkte" aus der DB
-
-        // Sicherstellen, dass die Lebenspunkte des Charakters in der Session gesetzt werden
-        if (!isset($_SESSION['spieler_lebenspunkte']) && isset($charakter_lebenspunkte)) {
-            $_SESSION['spieler_lebenspunkte'] = $charakter_lebenspunkte;
-        }
-    } else {
-        throw new Exception("Charakter nicht gefunden!");
+    // Sicherstellen, dass die Lebenspunkte des Charakters in der Session gesetzt werden
+    if (!isset($_SESSION['spieler_lebenspunkte']) && isset($charakter_lebenspunkte)) {
+        $_SESSION['spieler_lebenspunkte'] = $charakter_lebenspunkte;
     }
-
-    // Commit der Transaktion
-    $conn->commit();
-} catch (Exception $e) {
-    // Wenn ein Fehler auftritt, Rollback durchführen
-    $conn->rollback();
-    echo "Fehler: " . $e->getMessage();
-    exit();
-} finally {
-    // Verbindung schließen
-    $conn->close();
+} else {
+    echo "Charakter nicht gefunden!";
 }
+
+$conn->close();
 
 // Wenn der Spieler einen Angriff wählt
 if (isset($_POST['angriff'])) {
@@ -179,7 +156,6 @@ if (isset($_POST['angriff'])) {
     <link rel="stylesheet" href="stylesheet.css">
 </head>
 <body>
-    <!-- Clouds als Hintergrund -->
     <div class="clouds">
         <div class="clouds-1"></div>
         <div class="clouds-2"></div>
@@ -254,13 +230,12 @@ if (isset($_POST['angriff'])) {
                     <div class="player-layout">
                         <!-- Links: 2 Standardangriffe -->
                         <form method="POST">
-                            <div class="attack-buttons">
-                                <div class="attacks-left">
-                                    <button type="submit" name="angriff" value="angriff1"><?php echo htmlspecialchars($charakter_angriff1) . " - Schaden: " . $charakter_schaden1; ?></button>
-                                    <button type="submit" name="angriff" value="angriff2"><?php echo htmlspecialchars($charakter_angriff2) . " - Schaden: " . $charakter_schaden2; ?></button>
-                                </div>
-                            </div>
-                        </form>
+                <!-- Attacken Buttons innerhalb des Spielerbereichs -->
+                <div class="attack-buttons">
+                    <div class="attacks-left">
+                        <button type="submit" name="angriff" value="angriff1"><?php echo htmlspecialchars($charakter_angriff1) . " - Schaden: " . $charakter_schaden1; ?></button>
+                        <button type="submit" name="angriff" value="angriff2"><?php echo htmlspecialchars($charakter_angriff2) . " - Schaden: " . $charakter_schaden2; ?></button>
+                    </div></form>
 
                         <!-- Bild des Charakters -->
                         <div class="player-image-container">
@@ -271,14 +246,13 @@ if (isset($_POST['angriff'])) {
                             <?php endif; ?>
                         </div>
 
-                        <!-- Rechts: 1 Standardangriff und Spezialattacke -->
-                        <form method="POST">
-                            <div class="attacks-right">
-                                <button type="submit" name="angriff" value="angriff3"><?php echo htmlspecialchars($charakter_angriff3) . " - Schaden: " . $charakter_schaden3; ?></button>
-                                <button type="submit" name="angriff" value="spezial"><?php echo htmlspecialchars($charakter_spezialangriff) . " - Schaden: " . $charakter_schaden_spezial; ?></button>
-                            </div>
-                        </form>
+                         <form method="POST">
+                    <div class="attacks-right">
+                        <button type="submit" name="angriff" value="angriff3"><?php echo htmlspecialchars($charakter_angriff3) . " - Schaden: " . $charakter_schaden3; ?></button>
+                        <button type="submit" name="angriff" value="spezial"><?php echo htmlspecialchars($charakter_spezialangriff) . " - Schaden: " . $charakter_schaden_spezial; ?></button>
                     </div>
+                </div>
+            </form>
 
                     <div class="health-bar-container">
                         <div class="hs-wrapper gold">
@@ -298,11 +272,116 @@ if (isset($_POST['angriff'])) {
                         </div>
                     </div>
                 </div>
-            </div>
             </section>
+        </div>
     </main>
 </body>
- <footer>
+
+    <footer>
         <p>Codebreakers - Battle of Minds Trading Card Game - Alle Rechte vorbehalten. &copy;2025</p>
     </footer>
+</html>
+###
+
+<?php
+session_start();
+
+// Überprüfen, ob der Benutzer eingeloggt ist
+if (!isset($_SESSION['user_id'])) {
+    header("Location: login.php"); // Wenn nicht eingeloggt, zur Login-Seite weiterleiten
+    exit();
+}
+
+// Benutzerinformationen aus der Session
+$benutzername = $_SESSION['benutzername'];
+$charakter = isset($_SESSION['charakter']) ? $_SESSION['charakter'] : '';
+
+// Verbindung zur Datenbank herstellen
+$servername = "localhost";
+$username = "root"; // Dein Datenbank-Benutzername
+$password = ""; // Dein Datenbank-Passwort
+$dbname = "kartenspiel1_db"; // Dein Datenbankname
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+// Überprüfen, ob die Verbindung erfolgreich war
+if ($conn->connect_error) {
+    die("Verbindung zur Datenbank fehlgeschlagen: " . $conn->connect_error);
+}
+
+// Abfrage der Punkte des eingeloggten Benutzers
+$sql_punkte = "SELECT punkte FROM nutzer WHERE benutzername = '$benutzername'";
+$result_punkte = $conn->query($sql_punkte);
+$punkte = 0;
+
+if ($result_punkte->num_rows > 0) {
+    $row = $result_punkte->fetch_assoc();
+    $punkte = $row['punkte'];
+} else {
+    echo "Keine Punkte gefunden für den Benutzer.";
+}
+
+// Abfrage der Levels und deren Punktgrenzen
+$sql_levels = "SELECT * FROM level_system ORDER BY level";
+$result_levels = $conn->query($sql_levels);
+
+// Array zur Verknüpfung der Level mit den Freischaltbedingungen
+$level_status = [];
+if ($result_levels->num_rows > 0) {
+    while ($row = $result_levels->fetch_assoc()) {
+        // Wenn der Benutzer genug Punkte hat, wird das Level freigeschaltet
+        if ($punkte >= $row['punkte_bis']) {
+            $level_status[$row['level']] = true;
+        } else {
+            $level_status[$row['level']] = false;
+        }
+    }
+}
+
+$conn->close();
+?>
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dein Abenteuer</title>
+    <link rel="stylesheet" href="styles2.css">
+    <style>
+        /* Visuelle Darstellung der deaktivierten Buttons */
+        .disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            pointer-events: none; /* Verhindert Klicks */
+        }
+    </style>
+</head>
+<body>
+    <div class="clouds">
+        <div class="clouds-1"></div>
+        <div class="clouds-2"></div>
+        <div class="clouds-3"></div>
+    </div>
+    <header>
+        <h1>Willkommen zurück, <?php echo htmlspecialchars($benutzername); ?>!</h1>
+        <p>Du spielst als: <?php echo htmlspecialchars($charakter); ?></p>
+        <p>Deine aktuellen Punkte: <?php echo $punkte; ?></p>
+    </header>
+    <main>
+        <!-- Dynamische Level-Anzeige -->
+        <?php for ($i = 1; $i <= 24; $i++): ?>
+            <section class="section<?php echo ceil($i / 6); ?>">
+                <!-- Button für jedes Level -->
+                <button class="my-button<?php echo $i; ?>" 
+                    <?php if (isset($level_status[$i]) && !$level_status[$i]) echo 'class="disabled"'; ?> 
+                    onclick="window.location.href='intro<?php echo $i; ?>.php';">
+                    LEVEL <?php echo $i; ?>
+                </button>
+            </section>
+        <?php endfor; ?>
+    </main>
+    <footer>
+        <p>&copy; 2025 Trading Card Game - Alle Rechte vorbehalten.</p>
+    </footer>
+</body>
 </html>

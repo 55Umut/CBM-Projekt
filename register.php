@@ -12,9 +12,10 @@ $conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
     die("Verbindung zur Datenbank fehlgeschlagen: " . $conn->connect_error);
 }
- 
+
 $error = $success = "";
 
+// Wenn das Formular abgesendet wurde
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Eingabedaten
     $benutzername = $_POST['username'];
@@ -26,41 +27,59 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($passwort !== $confirm_password) {
         $error = "Die Passwörter stimmen nicht überein!";
     } else {
-        // Überprüfen, ob der Benutzername oder die E-Mail bereits existiert
-        $sql = "SELECT * FROM nutzer WHERE email = ? OR benutzername = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ss", $email, $benutzername);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        // Starten einer Transaktion
+        $conn->begin_transaction();
 
-        if ($result->num_rows > 0) {
-            $error = "Benutzername oder E-Mail bereits vergeben!";
-        } else {
-            // Passwort hashen
-            $hashed_password = password_hash($passwort, PASSWORD_DEFAULT);
-
-            // Neuen Benutzer in der Datenbank einfügen
-            $sql = "INSERT INTO nutzer (benutzername, email, passwort) VALUES (?, ?, ?)";
+        try {
+            // Überprüfen, ob der Benutzername oder die E-Mail bereits existiert
+            $sql = "SELECT * FROM nutzer WHERE email = ? OR benutzername = ?";
             $stmt = $conn->prepare($sql);
-            $stmt->bind_param("sss", $benutzername, $email, $hashed_password);
+            $stmt->bind_param("ss", $email, $benutzername);
+            $stmt->execute();
+            $result = $stmt->get_result();
 
-            if ($stmt->execute()) {
-                $success = "Registrierung erfolgreich! Du kannst dich jetzt einloggen.";
-                // Weiterleitung zum Projekt nach erfolgreicher Registrierung
-                            session_start();
-                         $_SESSION['user_id'] = $row['id'];
-                        $_SESSION['benutzername'] = $row['benutzername'];
-                        $_SESSION['email'] = $row['email'];
-                
-                header("Location: abenteuer.php");  // Hier änderst du die Weiterleitung auf projekt.php
-                exit();
+            if ($result->num_rows > 0) {
+                $error = "Benutzername oder E-Mail bereits vergeben!";
+                $conn->rollback(); // Rollback bei Fehler
             } else {
-                $error = "Fehler bei der Registrierung! Bitte versuche es später erneut.";
+                // Passwort hashen
+                $hashed_password = password_hash($passwort, PASSWORD_DEFAULT);
+
+                // Neuen Benutzer in der Datenbank einfügen
+                $sql = "INSERT INTO nutzer (benutzername, email, passwort) VALUES (?, ?, ?)";
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param("sss", $benutzername, $email, $hashed_password);
+
+                if ($stmt->execute()) {
+                    // Erfolgreiche Registrierung
+                    $success = "Registrierung erfolgreich! Du kannst dich jetzt einloggen.";
+
+                    // Session starten
+                    session_start();
+                    $_SESSION['user_id'] = $conn->insert_id; // Die ID des eingefügten Benutzers
+                    $_SESSION['benutzername'] = $benutzername;
+                    $_SESSION['email'] = $email;
+
+                    // Commit der Transaktion
+                    $conn->commit();
+
+                    // Weiterleitung zur Startseite (z.B. abenteuer.php)
+                    header("Location: abenteuer.php");
+                    exit();
+                } else {
+                    $error = "Fehler bei der Registrierung! Bitte versuche es später erneut.";
+                    $conn->rollback(); // Rollback bei Fehler
+                }
             }
+        } catch (Exception $e) {
+            // Falls ein Fehler auftritt, wird die Transaktion zurückgerollt
+            $conn->rollback();
+            $error = "Ein Fehler ist aufgetreten. Bitte versuche es später erneut.";
         }
     }
 }
 
+// Verbindung schließen
 $conn->close();
 ?>
 

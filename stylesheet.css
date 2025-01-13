@@ -13,15 +13,7 @@ body {
   margin: 0;
   display: flex;
   flex-direction: column;
-}
-
-/* Hintergrund für den Body */
-body {
-  background: linear-gradient(#333, #000);
-  text-align: center;
-  vertical-align: middle;
   position: relative;
-  flex: 1;
 }
 
 /* Wolken */
@@ -29,11 +21,12 @@ body {
   opacity: 0.4;
   pointer-events: none;
   position: absolute;
-  overflow: hidden;
   top: 0;
   left: 0;
   right: 0;
-  height: 100%;
+  bottom: 0;
+  z-index: -1; /* Wolken hinter dem Inhalt */
+  overflow: hidden;
 }
 
 .clouds-1,
@@ -81,18 +74,31 @@ body {
   }
 }
 
+/* Hintergrund für den Body */
+body {
+  background: linear-gradient(
+    #333,
+    #000
+  ); /* Verläuft von Dunkelgrau nach Schwarz */
+  text-align: center;
+  vertical-align: middle;
+  position: relative;
+  flex: 1;
+  overflow: hidden; /* Verhindert, dass die Wolken aus dem Sichtbereich hinausragen */
+}
+
 /* Allgemeine Stile */
 header {
-  background-color: transparent; /* Header transparent */
-  color: #ffd700; /* Textfarbe bleibt gelb für besseren Kontrast */
+  background-color: transparent;
+  color: #ffd700;
   padding: 10px 20px;
   text-align: center;
-  position: sticky; /* Setze Position auf sticky */
-  top: 0; /* Fixiere den Header am oberen Rand */
+  position: sticky;
+  top: 0;
   width: 100%;
   z-index: 10;
   border-radius: 5px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); /* Etwas Schatten für besseren Kontrast */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
 }
 
 header h1 {
@@ -113,9 +119,10 @@ header h1 {
 }
 
 /* Gegnerbereich */
-.opponent {
+.opponent,
+.player {
   width: 80%;
-  background-color: transparent; /* Gegnerbereich transparent */
+  background-color: transparent; /* Transparenten Hintergrund für beide Bereiche */
   color: white;
   padding: 20px;
   border-radius: 10px;
@@ -125,8 +132,9 @@ header h1 {
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); /* Etwas Schatten für besseren Kontrast */
 }
 
-/* Layout für die Angriffe und das Bossbild */
-.boss-layout {
+/* Layout für die Angriffe und das Boss- oder Spielerbild */
+.boss-layout,
+.player-layout {
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -136,12 +144,16 @@ header h1 {
 /* Links: Angriffe */
 .attacks-left,
 .attacks-right {
-  width: 45%; /* Beide Bereiche nehmen jeweils 45% der Breite ein */
+  width: 45%;
   padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-.boss-image-container {
-  width: 15%; /* Das Bild des Bosses nimmt 15% der Breite ein */
+.boss-image-container,
+.player-image-container {
+  width: 15%;
   text-align: center;
 }
 
@@ -149,11 +161,13 @@ header h1 {
   font-size: 1.1rem;
   color: #ffd700;
   margin: 10px 0;
+  text-align: center;
 }
 
-/* Boss-Bildgröße anpassen */
-.boss-image {
-  max-width: 350px; /* Erhöht die maximale Breite des Bossbildes */
+/* Boss- oder Spieler-Bildgröße anpassen */
+.boss-image,
+.player-image {
+  max-width: 350px;
   height: auto;
   margin-bottom: 15px;
 }
@@ -193,112 +207,66 @@ header h1 {
   margin-top: 10px;
 }
 
-/* Entfernt den Hintergrund beim Bossnamen und stellt ihn fett und blau dar */
 .hs-wrapper.gold {
   margin: 5px 0;
   display: inline-block;
-  padding: 0; /* Kein zusätzlicher Abstand */
+  padding: 0;
 }
 
 .hs-text.gold {
-  font-weight: bold; /* Der Bossname wird fett dargestellt */
-  color: #3498db; /* Blau für den Bossnamen */
-  padding: 5px 20px; /* Padding für etwas Abstand */
+  font-weight: bold;
+  color: #3498db;
+  padding: 5px 20px;
 }
 
-/* Spielerbereich */
-.player {
-  width: 80%;
-  background-color: rgba(0, 0, 0, 0); /* Transparent */
-  color: white;
-  padding: 10px;
-  border-radius: 10px;
-  text-align: center;
-  position: relative; /* Position relativ, damit der Footer nicht überlappt */
-  z-index: 10;
-  margin-bottom: 20px; /* Abstand zum Footer */
-}
-
-.player-info {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.player-layout {
+/* Attacken Buttons */
+.attack-buttons {
   display: flex;
   justify-content: space-between;
-  width: 100%;
+  width: 80%;
+  margin-top: 15px;
 }
 
-.attacks-left,
-.attacks-right {
-  width: 45%; /* Beide Bereiche nehmen jeweils 45% der Breite ein */
-  padding: 10px;
-}
-
-.player-image-container {
-  width: 15%; /* Das Bild des Charakters nimmt 15% der Breite ein */
-  text-align: center;
-}
-
-.player-image {
-  max-width: 150px;
-  height: auto;
-  margin-bottom: 15px;
-}
-
-.attack {
-  font-size: 1.1rem;
+.attacks-left button,
+.attacks-right button {
+  background-color: #333;
   color: #ffd700;
-  margin: 10px 0;
+  border: none;
+  padding: 15px 25px;
+  margin: 5px;
+  font-size: 1.2rem;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  width: 190px;
+  height: 110px; /* Festgelegte Größe für alle Buttons */
 }
 
-.health-bar-container {
-  margin-bottom: 20px;
+.attacks-left button:hover,
+.attacks-right button:hover {
+  background-color: #444;
 }
 
-.health-bar--outline {
-  width: 100%;
-  height: 20px;
-  background: #444;
-  border-radius: 10px;
-  margin-bottom: 5px;
+/* Abstände anpassen */
+.attacks-left {
+  margin-right: 20px; /* Gleicher Abstand wie beim Boss */
 }
 
-.health-bar--border {
-  position: relative;
-  height: 100%;
-}
-
-.health-bar--background {
-  background: #e74c3c;
-  height: 100%;
-  border-radius: 10px;
-  width: 100%;
-}
-
-.health-bar--health {
-  height: 100%;
-  background: #2ecc71;
-  border-radius: 10px;
-}
-
-.health-indicator p {
-  margin-top: 10px;
+.attacks-right {
+  margin-left: 20px; /* Gleicher Abstand wie beim Boss */
 }
 
 /* Footer */
 footer {
-  background-color: transparent; /* Footer transparent */
-  color: #ffd700; /* Textfarbe bleibt gelb */
+  background-color: transparent;
+  color: #ffd700;
   text-align: center;
   padding: 10px;
   position: relative;
   bottom: 0;
   width: 100%;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); /* Etwas Schatten für besseren Kontrast */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  z-index: 10; /* Sicherstellen, dass der Footer über den Wolken bleibt */
 }
 
 footer p {
