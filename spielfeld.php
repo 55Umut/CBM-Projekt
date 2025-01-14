@@ -9,7 +9,74 @@ if (!isset($_SESSION['user_id'])) {
 
 // Benutzerinformationen aus der Session
 $benutzername = $_SESSION['benutzername'];
-$charakter_name = isset($_SESSION['charakter']) ? $_SESSION['charakter'] : '';
+
+// Abrufen der Charakter-ID des Spielers aus der nutzer_log Tabelle
+$nutzer_id = $_SESSION['user_id']; // Benutzer-ID aus der Session
+
+// Verbindung zur Datenbank
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "kartenspiel1_db";
+
+// Funktion zum Erstellen einer Datenbankverbindung
+function createDbConnection($servername, $username, $password, $dbname) {
+    $conn = new mysqli($servername, $username, $password, $dbname);
+    if ($conn->connect_error) {
+        die("Verbindung fehlgeschlagen: " . $conn->connect_error);
+    }
+    return $conn;
+}
+
+$conn = createDbConnection($servername, $username, $password, $dbname);
+
+// Abrufen des Charakters aus der nutzer_log Tabelle anhand der Benutzer-ID
+$sql = "SELECT charakter_id FROM nutzer_log WHERE nutzer_id = ? AND aktion = 'Character selection' ORDER BY id DESC LIMIT 1";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $nutzer_id);
+$stmt->execute();
+$result = $stmt->get_result();
+
+$charakter_id = null;
+
+if ($result->num_rows > 0) {
+    $row = $result->fetch_assoc();
+    $charakter_id = $row['charakter_id'];
+} else {
+    die("Kein Charakter ausgewählt.");
+}
+
+// Abrufen der Charakterdaten aus der charaktere Tabelle
+$sql_charakter = "SELECT * FROM charaktere WHERE id = ?";
+$stmt_charakter = $conn->prepare($sql_charakter);
+$stmt_charakter->bind_param("i", $charakter_id);
+$stmt_charakter->execute();
+$result_charakter = $stmt_charakter->get_result();
+
+$charakter = null;
+
+if ($result_charakter->num_rows > 0) {
+    $charakter = $result_charakter->fetch_assoc();
+} else {
+    die("Charakterdaten nicht gefunden.");
+}
+
+$charakter_name = $charakter['name'];
+$charakter_angriff1 = $charakter['standardangriff1'];
+$charakter_schaden1 = $charakter['schaden1'];
+$charakter_angriff2 = $charakter['standardangriff2'];
+$charakter_schaden2 = $charakter['schaden2'];
+$charakter_angriff3 = $charakter['standardangriff3'];
+$charakter_schaden3 = $charakter['schaden3'];
+$charakter_spezialangriff = $charakter['spezialangriff'];
+$charakter_schaden_spezial = $charakter['schaden_spezial'];
+$charakter_bild_url = $charakter['bild_url'];
+$charakter_lebenspunkte = $charakter['leben'];
+
+// Sicherstellen, dass die Lebenspunkte des Charakters in der Session gesetzt werden
+if (!isset($_SESSION['spieler_lebenspunkte']) && isset($charakter_lebenspunkte)) {
+    $_SESSION['spieler_lebenspunkte'] = $charakter_lebenspunkte;
+}
 
 // Beispielwerte für Punkte
 if (!isset($_SESSION['spieler_punkte'])) {
@@ -52,68 +119,6 @@ $boss_angriff2 = $_SESSION['boss_angriff2'];
 $boss_schaden2 = $_SESSION['boss_schaden2'];
 $boss_angriff3 = $_SESSION['boss_angriff3'];
 $boss_schaden3 = $_SESSION['boss_schaden3'];
-
-// Lade die Charakterdaten des Spielers
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "kartenspiel1_db";
-
-// Funktion zum Erstellen einer Datenbankverbindung
-function createDbConnection($servername, $username, $password, $dbname) {
-    $conn = new mysqli($servername, $username, $password, $dbname);
-    if ($conn->connect_error) {
-        die("Verbindung fehlgeschlagen: " . $conn->connect_error);
-    }
-    return $conn;
-}
-
-// Sichere SQL-Abfrage zur Auswahl des Charakters
-$conn = createDbConnection($servername, $username, $password, $dbname);
-
-// Start der Transaktion
-$conn->begin_transaction();
-
-try {
-    // Sichere SQL-Abfrage zur Auswahl des Charakters
-    $charakterQuery = $conn->prepare("SELECT * FROM charaktere WHERE name = ?");
-    $charakterQuery->bind_param("s", $charakter_name);
-    $charakterQuery->execute();
-    $result_charakter = $charakterQuery->get_result();
-
-    if ($result_charakter->num_rows > 0) {
-        $charakter = $result_charakter->fetch_assoc();
-        $charakter_name = $charakter['name'];
-        $charakter_angriff1 = $charakter['standardangriff1'];
-        $charakter_schaden1 = $charakter['schaden1'];
-        $charakter_angriff2 = $charakter['standardangriff2'];
-        $charakter_schaden2 = $charakter['schaden2'];
-        $charakter_angriff3 = $charakter['standardangriff3'];
-        $charakter_schaden3 = $charakter['schaden3'];
-        $charakter_spezialangriff = $charakter['spezialangriff'];
-        $charakter_schaden_spezial = $charakter['schaden_spezial'];
-        $charakter_bild_url = $charakter['bild_url'];
-        $charakter_lebenspunkte = $charakter['leben']; // Verwende "leben" statt "lebenspunkte" aus der DB
-
-        // Sicherstellen, dass die Lebenspunkte des Charakters in der Session gesetzt werden
-        if (!isset($_SESSION['spieler_lebenspunkte']) && isset($charakter_lebenspunkte)) {
-            $_SESSION['spieler_lebenspunkte'] = $charakter_lebenspunkte;
-        }
-    } else {
-        throw new Exception("Charakter nicht gefunden!");
-    }
-
-    // Commit der Transaktion
-    $conn->commit();
-} catch (Exception $e) {
-    // Wenn ein Fehler auftritt, Rollback durchführen
-    $conn->rollback();
-    echo "Fehler: " . $e->getMessage();
-    exit();
-} finally {
-    // Verbindung schließen
-    $conn->close();
-}
 
 // Wenn der Spieler einen Angriff wählt
 if (isset($_POST['angriff'])) {
@@ -298,11 +303,11 @@ if (isset($_POST['angriff'])) {
                         </div>
                     </div>
                 </div>
-            </div>
             </section>
+        </div>
     </main>
 </body>
- <footer>
-        <p>Codebreakers - Battle of Minds Trading Card Game - Alle Rechte vorbehalten. &copy;2025</p>
-    </footer>
+<footer>
+    <p>&copy; 2025 Codebreakers - Battle of Minds Trading Card Game - Alle Rechte vorbehalten.</p>
+</footer>
 </html>

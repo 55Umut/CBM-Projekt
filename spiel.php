@@ -6,10 +6,11 @@ if (!isset($_SESSION['user_id'])) {
     header("Location: login.php"); // Wenn nicht eingeloggt, zur Login-Seite weiterleiten
     exit();
 }
-
+ 
 // Benutzerinformationen aus der Session
 $benutzername = $_SESSION['benutzername'];
-$charakter = isset($_SESSION['charakter']) ? $_SESSION['charakter'] : '';
+$charakter = isset($_SESSION['charakter']) ? (int) $_SESSION['charakter'] : '';
+$level = isset($_SESSION['level']) ? (int) $_SESSION['level'] : ''; // Level aus der Session (wenn vorhanden)
 
 // Verbindung zur Datenbank herstellen
 $servername = "localhost";
@@ -23,7 +24,52 @@ if ($conn->connect_error) {
     die("Verbindung zur Datenbank fehlgeschlagen: " . $conn->connect_error);
 }
 
-// Start der Transaktion
+// Wenn der Benutzer ein Level auswählt, protokollieren wir es in der nutzer_log-Tabelle
+if (isset($_GET['level'])) {
+    // Sicherstellen, dass das Level ausgewählt wurde
+    if (!empty($_GET['level'])) {
+        $selected_level = (int) $_GET['level'];
+
+        // Sicherstellen, dass das Level in der Datenbank existiert
+        $stmt_check = $conn->prepare("SELECT level FROM level_system WHERE level = ?");
+        $stmt_check->bind_param("i", $selected_level);
+        $stmt_check->execute();
+        $stmt_check->store_result();
+         
+        if ($stmt_check->num_rows > 0) {
+            // Das Level in der Session speichern
+            $_SESSION['level'] = $selected_level;
+
+            require_once 'nutzerlog.php';
+            $nutzerLog = new NutzerLog($servername, $username, $password, $dbname);
+            $nutzerLog->insertLog(
+                $_SESSION['user_id'], 
+                'Level selection',
+                "Benutzer {$_SESSION['user_id']} hat Level $selected_level ausgewählt.",
+                $_SESSION['level'],
+                null, 
+                $_POST['charakter'],
+                'Aktiv',
+                null  
+            );
+        }
+
+        $stmt_check->close();
+
+        header('location: intro1.php');
+        exit;
+    }
+}
+
+// Abfrage des Charakters (wie gehabt, nur zur Information)
+$stmt = $conn->prepare("SELECT `name` FROM charaktere WHERE id = ?");
+$stmt->bind_param("i", $charakter);
+$stmt->execute();
+$stmt->bind_result($charakter);
+$stmt->fetch();
+$stmt->close();
+
+// Start der Transaktion (falls erforderlich, aber nicht für Levelauswahl nötig)
 $conn->begin_transaction();
 
 try {
@@ -39,7 +85,7 @@ try {
         throw new Exception("Keine Punkte gefunden für den Benutzer.");
     }
 
-    // Abfrage der Leveldaten
+    // Abfrage der Leveldaten (nicht zwingend notwendig, wenn nur die Auswahl protokolliert wird)
     $level_status = [];
     $stmt = $conn->prepare("SELECT level, punkte_bis FROM level_system ORDER BY level");
     $stmt->execute();
@@ -125,10 +171,11 @@ try {
         <section class="section">
             <div class="button-container">
                 <!-- LEVEL 1 immer aktiv, auch wenn der Benutzer keine Punkte hat -->
-                <button class="my-button1 <?php echo ($punkte >= 0) ? 'enabled' : 'disabled'; ?>" onclick="window.location.href='intro1.php';">LEVEL 1</button>
-                <button class="my-button2 <?php echo ($punkte >= 100) ? 'enabled' : 'disabled'; ?>" onclick="window.location.href='intro2.php';">LEVEL 2</button>
-                <button class="my-button3 <?php echo ($punkte >= 250) ? 'enabled' : 'disabled'; ?>" onclick="window.location.href='intro3.php';">LEVEL 3</button>
-                <button class="my-button4 <?php echo ($punkte >= 500) ? 'enabled' : 'disabled'; ?>" onclick="window.location.href='intro4.php';">LEVEL 4</button>
+
+                <button class="my-button1 <?php echo ($punkte >= 0) ? 'enabled' : 'disabled'; ?>" onclick="window.location.href='spiel.php?level=1';">LEVEL 1</button>
+                <button class="my-button2 <?php echo ($punkte >= 100) ? 'enabled' : 'disabled'; ?>" onclick="window.location.href='spiel.php?level=2';">LEVEL 2</button>
+                <button class="my-button3 <?php echo ($punkte >= 250) ? 'enabled' : 'disabled'; ?>" onclick="window.location.href='spiel.php?level=3';">LEVEL 3</button>
+                <button class="my-button4 <?php echo ($punkte >= 500) ? 'enabled' : 'disabled'; ?>" onclick="window.location.href='spiel.php?level=4';">LEVEL 4</button>
                 <button class="my-button5 <?php echo ($punkte >= 1000) ? 'enabled' : 'disabled'; ?>" onclick="window.location.href='intro5.php';">LEVEL 5</button>
                 <button class="my-button6 <?php echo ($punkte >= 2000) ? 'enabled' : 'disabled'; ?>" onclick="window.location.href='intro6.php';">LEVEL 6</button>
             </div>
@@ -169,7 +216,7 @@ try {
     </main>
 
     <footer>
-        <p>&copy; 2025 Trading Card Game - Alle Rechte vorbehalten.</p>
+        <p>&copy; 2025 Codebreakers - Battle of Minds Trading Card Game - Alle Rechte vorbehalten.</p>
     </footer>
 </body>
 </html>

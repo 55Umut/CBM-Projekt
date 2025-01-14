@@ -48,7 +48,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 
                 // Commit der Transaktion, falls alles erfolgreich war
                 $conn->commit();
+                  // **Einbinden der NutzerLog-Klasse**
+                require_once 'nutzerlog.php'; // Achte darauf, dass der Pfad zur Datei stimmt
 
+                // Instanz von NutzerLog für Tracking erstellen
+                $nutzerLog = new NutzerLog($servername, $username, $password, $dbname);
+                
+                // Action und Details für den Logeintrag festlegen
+                $action = 'Login';
+                $details = 'Erfolgreich eingeloggt mit der E-Mail ' . $email; // Zusätzliche Details
+
+                // Logeintrag in die Datenbank einfügen
+                if ($nutzerLog->insertLog($_SESSION['user_id'], $action, $details)) {
+                    // Logeintrag erfolgreich gespeichert
+                } else {
+                    $error = "Fehler beim Speichern des Logeintrags.";
+                }
+
+                // Weiterleitung zur Startseite (z.B. abenteuer.php)
+                header("Location: abenteuer.php");
+                exit();
                 // Weiterleitung zur Startseite (z.B. projekt.php oder abenteuer.php)
                 header("Location: abenteuer.php");
                 exit();

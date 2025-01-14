@@ -73,9 +73,47 @@ $conn->close();
 
 // Charakterauswahl-Funktion
 if (isset($_POST['charakter'])) {
-    $_SESSION['charakter'] = $_POST['charakter']; // Den ausgewählten Charakter speichern
-    header("Location: spiel.php"); // Weiterleitung zur nächsten Seite nach der Auswahl
-    exit();
+    // Sicherstellen, dass ein Charakter ausgewählt wurde
+    if (!empty($_POST['charakter'])) {
+        $_SESSION['charakter'] = $_POST['charakter']; // Den ausgewählten Charakter speichern
+
+        // Verbindung zur Datenbank herstellen
+        $conn = new mysqli($servername, $username, $password, $dbname);
+
+        // Überprüfen, ob die Verbindung erfolgreich war
+        if ($conn->connect_error) {
+            die("Verbindung zur Datenbank fehlgeschlagen: " . $conn->connect_error);
+        }
+
+        // Sicherstellen, dass der Charakter existiert
+        $sql_check = "SELECT id FROM charaktere WHERE id = ?";
+        $stmt_check = $conn->prepare($sql_check);
+        $stmt_check->bind_param("i", $_POST['charakter']);
+        $stmt_check->execute();
+        $result_check = $stmt_check->get_result();
+
+        if ($result_check->num_rows > 0) {
+            // Logeintrag erstellen
+            require_once 'nutzerlog.php';
+            $nutzerLog = new NutzerLog($servername, $username, $password, $dbname);
+            $nutzerLog->insertLog(
+                $_SESSION['user_id'], 
+                'Character selection', 
+                $_SESSION['user_id'] . ' hat sich einen Charakter ausgesucht.', 
+                null, 
+                null, 
+                $_POST['charakter']
+            );
+
+            // Weiterleitung zur nächsten Seite nach der Auswahl
+            header("Location: spiel.php");
+            exit();
+        } else {
+            echo "Ungültiger Charakter.";
+        }
+
+        $conn->close();
+    }
 }
 ?>
 
@@ -152,7 +190,7 @@ if (isset($_POST['charakter'])) {
                     <div class="charaktere">
                         <?php foreach ($charaktere as $charakter): ?>
                             <div>
-                                <input type="radio" name="charakter" id="charakter_<?php echo $charakter['id']; ?>" value="<?php echo $charakter['name']; ?>" required>
+                                <input type="radio" name="charakter" id="charakter_<?php echo $charakter['id']; ?>" value="<?php echo $charakter['id']; ?>" required>
                                 <label for="charakter_<?php echo $charakter['id']; ?>">
                                     <span><?php echo $charakter['name']; ?></span>
                                     <img src="<?php echo $charakter['bild_url']; ?>" alt="Bild von <?php echo $charakter['name']; ?>">
@@ -202,8 +240,8 @@ if (isset($_POST['charakter'])) {
         </div>
     </main>
 
-    <footer>
-        <p>&copy; 2025 Trading Card Game - Alle Rechte vorbehalten.</p>
+   <footer>
+        <p>&copy; 2025 Codebreakers - Battle of Minds Trading Card Game - Alle Rechte vorbehalten.</p>
     </footer>
 </body>
 </html>

@@ -67,7 +67,7 @@ if (isset($_POST['logout'])) {
     </main>
 
     <footer>
-        <p>&copy; 2025 Trading Card Game - Alle Rechte vorbehalten.</p>
+        <p>&copy; 2025 Codebreakers - Battle of Minds Trading Card Game - Alle Rechte vorbehalten.</p>
     </footer>
 </body>
 </html>

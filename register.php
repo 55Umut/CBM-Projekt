@@ -136,10 +136,9 @@ $conn->close();
         </section>
     </main>
 
-    <footer>
-        <p>&copy; 2025 Trading Card Game - Alle Rechte vorbehalten.</p>
+  <footer>
+        <p>&copy; 2025 Codebreakers - Battle of Minds Trading Card Game - Alle Rechte vorbehalten.</p>
     </footer>
-
     <script>
         // Funktion zum Abspielen des Audios beim Laden der Seite
         window.onload = function() {
