@@ -273,3 +273,29 @@ footer p {
   margin: 0;
   font-size: 1rem;
 }
+article {
+  display: none; /* Standardmäßig versteckt */
+  padding: 20px;
+  margin-top: 20px;
+  text-align: center;
+  font-size: 1.5em; /* Größere Schrift */
+  font-weight: bold;
+  font-family: "Roboto", sans-serif; /* Roboto als Schriftart */
+  border-radius: 10px;
+}
+
+article.show-message {
+  display: block; /* Nur anzeigen, wenn die Klasse 'show-message' gesetzt ist */
+}
+
+article p {
+  color: #f1c40f; /* Goldene Farbe für den Sieg */
+  background-color: #2c3e50; /* Dunkler Hintergrund */
+  border-radius: 10px;
+  padding: 10px;
+}
+
+article p:first-of-type {
+  color: #e74c3c; /* Rote Farbe für den Verlust */
+  background-color: #2c3e50; /* Dunkler Hintergrund */
+}

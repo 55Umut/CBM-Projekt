@@ -9,8 +9,6 @@ if (!isset($_SESSION['user_id'])) {
 
 // Benutzerinformationen aus der Session
 $benutzername = $_SESSION['benutzername'];
-
-// Abrufen der Charakter-ID des Spielers aus der nutzer_log Tabelle
 $nutzer_id = $_SESSION['user_id']; // Benutzer-ID aus der Session
 
 // Verbindung zur Datenbank
@@ -19,7 +17,7 @@ $username = "root";
 $password = "";
 $dbname = "kartenspiel1_db";
 
-// Funktion zum Erstellen einer Datenbankverbindung
+// Funktion zum Erstellen einer sicheren Datenbankverbindung
 function createDbConnection($servername, $username, $password, $dbname) {
     $conn = new mysqli($servername, $username, $password, $dbname);
     if ($conn->connect_error) {
@@ -30,7 +28,7 @@ function createDbConnection($servername, $username, $password, $dbname) {
 
 $conn = createDbConnection($servername, $username, $password, $dbname);
 
-// Abrufen des Charakters aus der nutzer_log Tabelle anhand der Benutzer-ID
+// Abrufen des Charakters des Spielers aus der nutzer_log Tabelle
 $sql = "SELECT charakter_id FROM nutzer_log WHERE nutzer_id = ? AND aktion = 'Character selection' ORDER BY id DESC LIMIT 1";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("i", $nutzer_id);
@@ -38,7 +36,6 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 $charakter_id = null;
-
 if ($result->num_rows > 0) {
     $row = $result->fetch_assoc();
     $charakter_id = $row['charakter_id'];
@@ -54,13 +51,13 @@ $stmt_charakter->execute();
 $result_charakter = $stmt_charakter->get_result();
 
 $charakter = null;
-
 if ($result_charakter->num_rows > 0) {
     $charakter = $result_charakter->fetch_assoc();
 } else {
     die("Charakterdaten nicht gefunden.");
 }
 
+// Charakter-Daten
 $charakter_name = $charakter['name'];
 $charakter_angriff1 = $charakter['standardangriff1'];
 $charakter_schaden1 = $charakter['schaden1'];
@@ -73,24 +70,110 @@ $charakter_schaden_spezial = $charakter['schaden_spezial'];
 $charakter_bild_url = $charakter['bild_url'];
 $charakter_lebenspunkte = $charakter['leben'];
 
-// Sicherstellen, dass die Lebenspunkte des Charakters in der Session gesetzt werden
+// Sicherstellen, dass die Lebenspunkte des Charakters gesetzt werden
 if (!isset($_SESSION['spieler_lebenspunkte']) && isset($charakter_lebenspunkte)) {
     $_SESSION['spieler_lebenspunkte'] = $charakter_lebenspunkte;
 }
 
-// Beispielwerte für Punkte
-if (!isset($_SESSION['spieler_punkte'])) {
-    $_SESSION['spieler_punkte'] = 0; // Initialisieren der Spieler-Punkte, falls sie nicht gesetzt sind
+// 1. Level abfragen
+if (isset($_SESSION['level'])) {
+    $level = $_SESSION['level'];  // Aus der Session verwenden, falls vorhanden
+} else {
+    // Level aus der Datenbank holen, wenn nicht in der Session
+    $sql_level = "SELECT level FROM nutzer_log WHERE nutzer_id = ? ORDER BY id DESC LIMIT 1";
+    $stmt_level = $conn->prepare($sql_level);
+    $stmt_level->bind_param("i", $nutzer_id);
+    $stmt_level->execute();
+    $stmt_level->bind_result($level);
+    $stmt_level->fetch();
+    $stmt_level->close();
+    $_SESSION['level'] = $level; // Speichern des Levels in der Session für zukünftige Anfragen
 }
 
-$spieler_punkte = $_SESSION['spieler_punkte'];  // Spielerpunkte
-$gegner_punkte = 30; // Beispielwert für Gegnerpunkte
+// 2. Punkte abfragen
+if (isset($_SESSION['punkte'])) {
+    $punkte = $_SESSION['punkte'];  // Aus der Session verwenden, falls vorhanden
+} else {
+    // Punkte aus der Datenbank holen, wenn nicht in der Session
+    $sql_punkte = "SELECT punkte FROM nutzer_log WHERE nutzer_id = ? ORDER BY id DESC LIMIT 1";
+    $stmt_punkte = $conn->prepare($sql_punkte);
+    $stmt_punkte->bind_param("i", $nutzer_id);
+    $stmt_punkte->execute();
+    $stmt_punkte->bind_result($punkte);
+    $stmt_punkte->fetch();
+    $stmt_punkte->close();
+    $_SESSION['punkte'] = $punkte; // Speichern der Punkte in der Session für zukünftige Abfragen
+}
 
-// Initialisiere den Boss nur einmal zu Beginn des Spiels
+// 3. Charakter-ID abfragen
+if (isset($_SESSION['charakter_id'])) {
+    $charakter_id = $_SESSION['charakter_id'];  // Aus der Session verwenden, falls vorhanden
+} else {
+    // Charakter-ID aus der Datenbank holen, wenn nicht in der Session
+    $sql_charakter = "SELECT charakter_id FROM nutzer_log WHERE nutzer_id = ? AND aktion = 'Character selection' ORDER BY id DESC LIMIT 1";
+    $stmt_charakter = $conn->prepare($sql_charakter);
+    $stmt_charakter->bind_param("i", $nutzer_id);
+    $stmt_charakter->execute();
+    $stmt_charakter->bind_result($charakter_id);
+    $stmt_charakter->fetch();
+    $stmt_charakter->close();
+    $_SESSION['charakter_id'] = $charakter_id; // Speichern der Charakter-ID in der Session für zukünftige Abfragen
+}
+
+// Array mit den relevanten Feldern
+$fields = [
+    'aktion' => 'Kein Eintrag',
+    'level' => $level,  // Abgefragtes Level
+    'punkte' => $punkte,  // Abgefragte Punkte
+    'charakter_id' => $charakter_id,  // Abgefragte Charakter-ID
+    'login' => 'Aktiv',  // Wird jetzt durch NOW() in SQL ersetzt
+    'status' => 'Aktiv',
+    'details' => 'Kein Detail'
+];
+
+// Schritt 1: Überprüfen der Session und ggf. Datenbank
+foreach ($fields as $field => $default) {
+    // Wenn der Wert bereits in der Session existiert, übernehme ihn
+    if (!isset($_SESSION[$field])) {
+        // Wenn der Wert nicht in der Session vorhanden ist, schaue in der Datenbank nach
+        $stmt = $conn->prepare("SELECT $field FROM nutzer_log WHERE nutzer_id = ? ORDER BY id DESC LIMIT 1");
+
+        if (!$stmt) {
+            // Fehler beim Vorbereiten der SQL-Abfrage
+            die("Fehler bei der SQL-Abfrage: " . $conn->error);
+        }
+
+        $stmt->bind_param("i", $nutzer_id);
+        $stmt->execute();
+        $stmt->bind_result($value);
+        $stmt->fetch();
+        
+        // Setze den Wert in die Session, wenn er aus der Datenbank kommt
+        $_SESSION[$field] = $value ? $value : $default;
+        $stmt->close();
+    }
+}
+
+
+// Prüfen, ob die Level in der Session vorhanden sind
+if (isset($_SESSION['level'])) {
+    // Wenn level in der Session sind, diese verwenden
+    $level = $_SESSION['level'];
+} else {
+    // Wenn keine level in der Session vorhanden sind, aus der Datenbank holen
+    $stmt = $conn->prepare("SELECT level FROM nutzer_log WHERE nutzer_id = ? ORDER BY id DESC LIMIT 1");
+    $stmt->bind_param("i", $nutzer_id);
+    $stmt->execute();
+    $stmt->bind_result($level);
+    $stmt->fetch();
+    $stmt->close();  
+    // Speichern des Levels in der Session
+    $_SESSION['level'] = $level;
+}
+
+// Boss initialisieren, wenn noch nicht gesetzt
 if (!isset($_SESSION['boss_name'])) {
     include_once 'bosse.php';
-
-    // Einen zufälligen Boss abrufen
     $randomBoss = Boss::getRandomBoss();
 
     // Speichern des Bosses in der Session
@@ -107,7 +190,7 @@ if (!isset($_SESSION['boss_name'])) {
     $_SESSION['boss_schaden3'] = $randomBoss->getSchaden3();
 }
 
-// Abrufen des gespeicherten Bosses aus der Session
+// Abrufen des gespeicherten Bosses
 $boss_name = $_SESSION['boss_name'];
 $boss_spezialattacke = $_SESSION['boss_spezialattacke'];
 $boss_schaden_spezial = $_SESSION['boss_schaden_spezial'];
@@ -125,6 +208,7 @@ if (isset($_POST['angriff'])) {
     $spieler_angriff = $_POST['angriff'];
     
     // Schaden basierend auf der Auswahl des Spielers
+    $spieler_schaden = 0;
     switch ($spieler_angriff) {
         case 'angriff1':
             $spieler_schaden = $charakter_schaden1;
@@ -138,15 +222,13 @@ if (isset($_POST['angriff'])) {
         case 'spezial':
             $spieler_schaden = $charakter_schaden_spezial;
             break;
-        default:
-            $spieler_schaden = 0;
     }
 
     // Boss verliert Lebenspunkte
     $_SESSION['boss_lebenspunkte'] -= $spieler_schaden;
 
     // Zufälliger Boss-Angriff
-    $boss_angriff = rand(1, 3); // Zufällig zwischen den Angriffen des Bosses wählen
+    $boss_angriff = rand(1, 3);
     switch ($boss_angriff) {
         case 1:
             $boss_schaden = $boss_schaden1;
@@ -165,14 +247,35 @@ if (isset($_POST['angriff'])) {
     // Spielrunde beenden, wenn einer besiegt wurde
     if ($_SESSION['boss_lebenspunkte'] <= 0) {
         $_SESSION['boss_lebenspunkte'] = 0;
-        $_SESSION['spieler_punkte'] += 10; // Spieler erhält Punkte
+        $_SESSION['punkte'] += 101; // Spieler erhält 101 Punkte
+        
+        // Level aus der Session holen
+        $level = $_SESSION['level'];
+
+        $details = "Benutzer: $benutzername, Level: $level, Charakter: $charakter_name"; 
+
+$sql_update_punkte = 'INSERT INTO nutzer_log (nutzer_id, aktion, punkte, level, charakter_id, status, details) values 
+                      (?, ?, ?, ?, ?, ?, ?)';
+
+$stmt_update_punkte = $conn->prepare($sql_update_punkte);
+$test123 = 'Boss besiegt';
+$test345 = 'Gewonnen';
+$stmt_update_punkte->bind_param("isiiiss", $nutzer_id, $test123 , $_SESSION['punkte'],   $level, $charakter_id, $test345, $details); // Hier wird der nutzer_id zweimal gebunden
+$stmt_update_punkte->execute();
+
     }
-    
+
+    // Überprüfen, ob der Spieler besiegt wurde
     if ($_SESSION['spieler_lebenspunkte'] <= 0) {
         $_SESSION['spieler_lebenspunkte'] = 0;
-        $_SESSION['gegner_punkte'] += 10; // Boss erhält Punkte
     }
 }
+$stmt = $conn->prepare("SELECT punkte FROM nutzer_log WHERE nutzer_id = ? ORDER BY id DESC LIMIT 1");
+$stmt->bind_param("i", $nutzer_id);  // "i" für Integer (nutzer_id ist eine Zahl)
+$stmt->execute();
+$stmt->bind_result($punkte);
+$stmt->fetch();
+$stmt->close();
 ?>
 
 <!DOCTYPE html>
@@ -184,7 +287,6 @@ if (isset($_POST['angriff'])) {
     <link rel="stylesheet" href="stylesheet.css">
 </head>
 <body>
-    <!-- Clouds als Hintergrund -->
     <div class="clouds">
         <div class="clouds-1"></div>
         <div class="clouds-2"></div>
@@ -192,28 +294,32 @@ if (isset($_POST['angriff'])) {
     </div>
 
     <header>
+        <nav>
+            <ul>
+                <li><a href="start.php">Startseite</a></li>
+                <li><a href="deck.php">Mein Deck</a></li>
+                <li><a href="shop.php">Karten Shop</a></li>
+            </ul>
+        </nav>
+        <!-- Logout-Formular -->
+        <form action="start.php" method="POST">
+            <button type="submit" name="logout" class="btn">Abmelden</button>
+        </form>
         <h1>Willkommen zurück, <?php echo htmlspecialchars($benutzername); ?>!</h1>
         <p>Du spielst als: <?php echo htmlspecialchars($charakter_name); ?></p>
-        <p>Deine aktuellen Punkte: <?php echo $spieler_punkte; ?></p>
+        <p>Deine aktuellen Punkte: <?php echo $_SESSION['punkte']; ?></p>
     </header>
 
     <main>
         <div class="game-container">
-            <!-- Gegnerbereich (fixiert oben) -->
             <section class="opponent">
                 <div class="player-info">
                     <div class="boss-layout">
-                        <!-- Links: 2 Standardangriffe -->
                         <div class="attacks-left">
-                            <p class="attack">
-                                <?php echo htmlspecialchars($boss_angriff1) . " - Schaden: " . $boss_schaden1; ?>
-                            </p>
-                            <p class="attack">
-                                <?php echo htmlspecialchars($boss_angriff2) . " - Schaden: " . $boss_schaden2; ?>
-                            </p>
+                            <p class="attack"><?php echo htmlspecialchars($boss_angriff1) . " - Schaden: " . $boss_schaden1; ?></p>
+                            <p class="attack"><?php echo htmlspecialchars($boss_angriff2) . " - Schaden: " . $boss_schaden2; ?></p>
                         </div>
 
-                        <!-- Bild des Bosses -->
                         <div class="boss-image-container">
                             <?php if (!empty($boss_bild_url)): ?>
                                 <img src="<?php echo $boss_bild_url; ?>" alt="Bild des Bosses" class="boss-image">
@@ -222,22 +328,15 @@ if (isset($_POST['angriff'])) {
                             <?php endif; ?>
                         </div>
 
-                        <!-- Rechts: 1 Standardangriff und Spezialattacke -->
                         <div class="attacks-right">
-                            <p class="attack">
-                                <?php echo htmlspecialchars($boss_angriff3) . " - Schaden: " . $boss_schaden3; ?>
-                            </p>
-                            <p class="attack">
-                                <?php echo htmlspecialchars($boss_spezialattacke) . " - Schaden: " . $boss_schaden_spezial; ?>
-                            </p>
+                            <p class="attack"><?php echo htmlspecialchars($boss_angriff3) . " - Schaden: " . $boss_schaden3; ?></p>
+                            <p class="attack"><?php echo htmlspecialchars($boss_spezialattacke) . " - Schaden: " . $boss_schaden_spezial; ?></p>
                         </div>
                     </div>
 
                     <div class="health-bar-container">
                         <div class="hs-wrapper gold">
-                            <p class="hs-text gold">
-                                <?php echo htmlspecialchars($boss_name); ?>
-                            </p>
+                            <p class="hs-text gold"><?php echo htmlspecialchars($boss_name); ?></p>
                         </div>
                         <div class="health-bar--outline">
                             <div class="health-bar--border">
@@ -253,11 +352,19 @@ if (isset($_POST['angriff'])) {
                 </div>
             </section>
 
-            <!-- Spielerbereich (fixiert unten) -->
+            <article class="<?php echo ($_SESSION['boss_lebenspunkte'] <= 0 || $_SESSION['spieler_lebenspunkte'] <= 0) ? 'show-message' : ''; ?>">
+                <?php
+                if ($_SESSION['boss_lebenspunkte'] <= 0) {
+                    echo "<p>Herzlichen Glückwunsch! Du hast den Boss " . htmlspecialchars($boss_name) . " besiegt!</p>";
+                } elseif ($_SESSION['spieler_lebenspunkte'] <= 0) {
+                    echo "<p>Du wurdest mental gebrochen! " . htmlspecialchars($charakter_name) . " darf jetzt Hartz 4 beantragen und das sinnlose Leben ertragen.</p>";
+                }
+                ?>
+            </article>
+
             <section class="player">
                 <div class="player-info">
                     <div class="player-layout">
-                        <!-- Links: 2 Standardangriffe -->
                         <form method="POST">
                             <div class="attack-buttons">
                                 <div class="attacks-left">
@@ -267,7 +374,6 @@ if (isset($_POST['angriff'])) {
                             </div>
                         </form>
 
-                        <!-- Bild des Charakters -->
                         <div class="player-image-container">
                             <?php if (!empty($charakter_bild_url)): ?>
                                 <img src="<?php echo $charakter_bild_url; ?>" alt="Bild des Charakters" class="player-image">
@@ -276,7 +382,6 @@ if (isset($_POST['angriff'])) {
                             <?php endif; ?>
                         </div>
 
-                        <!-- Rechts: 1 Standardangriff und Spezialattacke -->
                         <form method="POST">
                             <div class="attacks-right">
                                 <button type="submit" name="angriff" value="angriff3"><?php echo htmlspecialchars($charakter_angriff3) . " - Schaden: " . $charakter_schaden3; ?></button>
@@ -287,9 +392,7 @@ if (isset($_POST['angriff'])) {
 
                     <div class="health-bar-container">
                         <div class="hs-wrapper gold">
-                            <p class="hs-text gold">
-                                <?php echo htmlspecialchars($charakter_name); ?>
-                            </p>
+                            <p class="hs-text gold"><?php echo htmlspecialchars($charakter_name); ?></p>
                         </div>
                         <div class="health-bar--outline">
                             <div class="health-bar--border">
@@ -306,8 +409,14 @@ if (isset($_POST['angriff'])) {
             </section>
         </div>
     </main>
+
+    <script>
+        // Wenn entweder der Boss oder der Spieler besiegt ist, 3 Sekunden warten und dann auf 'spiel.php' weiterleiten
+        if (<?php echo ($_SESSION['boss_lebenspunkte'] <= 0 || $_SESSION['spieler_lebenspunkte'] <= 0) ? 'true' : 'false'; ?>) {
+            setTimeout(function() {
+                window.location.href = 'spiel.php';
+            }, 3000);
+        }
+    </script>
 </body>
-<footer>
-    <p>&copy; 2025 Codebreakers - Battle of Minds Trading Card Game - Alle Rechte vorbehalten.</p>
-</footer>
 </html>

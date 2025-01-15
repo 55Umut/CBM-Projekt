@@ -1,27 +1,111 @@
 <?php
-session_start();
+session_start(); // Stellt sicher, dass die Session gestartet wird
 
-// Überprüfen, ob der Benutzer eingeloggt ist
+// Stellen Sie sicher, dass eine gültige Benutzersitzung besteht
 if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php"); // Wenn nicht eingeloggt, zur Login-Seite weiterleiten
+    header("Location: login.php"); // Wenn der Benutzer nicht eingeloggt ist, auf die Login-Seite weiterleiten
     exit();
 }
- 
-// Benutzerinformationen aus der Session
+
+// Benutzer-ID und andere Session-Daten abrufen
+$nutzer_id = $_SESSION['user_id'];
 $benutzername = $_SESSION['benutzername'];
-$charakter = isset($_SESSION['charakter']) ? (int) $_SESSION['charakter'] : '';
-$level = isset($_SESSION['level']) ? (int) $_SESSION['level'] : ''; // Level aus der Session (wenn vorhanden)
+$charakter = isset($_SESSION['charakter']) ? (int) $_SESSION['charakter'] : ''; // Defaultwert, falls nicht gesetzt
+$level = isset($_SESSION['level']) ? (int) $_SESSION['level'] : ''; // Defaultwert, falls nicht gesetzt
+$punkte = isset($_SESSION['punkte']) ? (int) $_SESSION['punkte'] :''; 
 
 // Verbindung zur Datenbank herstellen
 $servername = "localhost";
-$username = "root"; // Dein Datenbank-Benutzername
-$password = ""; // Dein Datenbank-Passwort
-$dbname = "kartenspiel1_db"; // Dein Datenbankname
+$username = "root";
+$password = "";
+$dbname = "kartenspiel1_db";
 $conn = new mysqli($servername, $username, $password, $dbname);
 
 // Überprüfen, ob die Verbindung erfolgreich war
 if ($conn->connect_error) {
     die("Verbindung zur Datenbank fehlgeschlagen: " . $conn->connect_error);
+}
+
+// Nutzer-ID aus der Session
+$nutzer_id = $_SESSION['user_id']; // Beispiel: Nutzer-ID wird aus der Session gezogen
+
+// 1. Level abfragen
+if (isset($_SESSION['level'])) {
+    $level = $_SESSION['level'];  // Aus der Session verwenden, falls vorhanden
+} else {
+    // Level aus der Datenbank holen, wenn nicht in der Session
+    $sql_level = "SELECT level FROM nutzer_log WHERE nutzer_id = ? ORDER BY id DESC LIMIT 1";
+    $stmt_level = $conn->prepare($sql_level);
+    $stmt_level->bind_param("i", $nutzer_id);
+    $stmt_level->execute();
+    $stmt_level->bind_result($level);
+    $stmt_level->fetch();
+    $stmt_level->close();
+    $_SESSION['level'] = $level; // Speichern des Levels in der Session für zukünftige Anfragen
+}
+
+// 2. Punkte abfragen
+if (isset($_SESSION['punkte'])) {
+    $punkte = $_SESSION['punkte'];  // Aus der Session verwenden, falls vorhanden
+} else {
+    // Punkte aus der Datenbank holen, wenn nicht in der Session
+    $sql_punkte = "SELECT punkte FROM nutzer_log WHERE nutzer_id = ? ORDER BY id DESC LIMIT 1";
+    $stmt_punkte = $conn->prepare($sql_punkte);
+    $stmt_punkte->bind_param("i", $nutzer_id);
+    $stmt_punkte->execute();
+    $stmt_punkte->bind_result($punkte);
+    $stmt_punkte->fetch();
+    $stmt_punkte->close();
+    $_SESSION['punkte'] = $punkte; // Speichern der Punkte in der Session für zukünftige Abfragen
+}
+
+// 3. Charakter-ID abfragen
+if (isset($_SESSION['charakter_id'])) {
+    $charakter_id = $_SESSION['charakter_id'];  // Aus der Session verwenden, falls vorhanden
+} else {
+    // Charakter-ID aus der Datenbank holen, wenn nicht in der Session
+    $sql_charakter = "SELECT charakter_id FROM nutzer_log WHERE nutzer_id = ? AND aktion = 'Character selection' ORDER BY id DESC LIMIT 1";
+    $stmt_charakter = $conn->prepare($sql_charakter);
+    $stmt_charakter->bind_param("i", $nutzer_id);
+    $stmt_charakter->execute();
+    $stmt_charakter->bind_result($charakter_id);
+    $stmt_charakter->fetch();
+    $stmt_charakter->close();
+    $_SESSION['charakter_id'] = $charakter_id; // Speichern der Charakter-ID in der Session für zukünftige Abfragen
+}
+
+// Array mit den relevanten Feldern
+$fields = [
+    'aktion' => 'Kein Eintrag',
+    'level' => $level,  // Abgefragtes Level
+    'punkte' => $punkte,  // Abgefragte Punkte
+    'charakter_id' => $charakter_id,  // Abgefragte Charakter-ID
+    'login' => 'Aktiv',  // Wird jetzt durch NOW() in SQL ersetzt
+    'status' => 'Aktiv',
+    'details' => 'Kein Detail'
+];
+
+// Schritt 1: Überprüfen der Session und ggf. Datenbank
+foreach ($fields as $field => $default) {
+    // Wenn der Wert bereits in der Session existiert, übernehme ihn
+    if (!isset($_SESSION[$field])) {
+        // Wenn der Wert nicht in der Session vorhanden ist, schaue in der Datenbank nach
+        $stmt = $conn->prepare("SELECT $field FROM nutzer_log WHERE nutzer_id = ? ORDER BY id DESC LIMIT 1");
+
+        if (!$stmt) {
+            // Fehler beim Vorbereiten der SQL-Abfrage
+            die("Fehler bei der SQL-Abfrage: " . $conn->error);
+        }
+
+        $stmt->bind_param("i", $nutzer_id);
+        $stmt->execute();
+        $stmt->bind_result($value);
+        $stmt->fetch();
+        
+        // Setze den Wert in die Session, wenn er aus der Datenbank kommt
+        $_SESSION[$field] = $value ? $value : $default;
+        $stmt->close();
+    }
 }
 
 // Wenn der Benutzer ein Level auswählt, protokollieren wir es in der nutzer_log-Tabelle
@@ -32,6 +116,11 @@ if (isset($_GET['level'])) {
 
         // Sicherstellen, dass das Level in der Datenbank existiert
         $stmt_check = $conn->prepare("SELECT level FROM level_system WHERE level = ?");
+        if (!$stmt_check) {
+            // Fehler beim Vorbereiten der SQL-Abfrage
+            die("Fehler bei der SQL-Abfrage: " . $conn->error);
+        }
+
         $stmt_check->bind_param("i", $selected_level);
         $stmt_check->execute();
         $stmt_check->store_result();
@@ -40,18 +129,23 @@ if (isset($_GET['level'])) {
             // Das Level in der Session speichern
             $_SESSION['level'] = $selected_level;
 
-            require_once 'nutzerlog.php';
-            $nutzerLog = new NutzerLog($servername, $username, $password, $dbname);
-            $nutzerLog->insertLog(
-                $_SESSION['user_id'], 
-                'Level selection',
-                "Benutzer {$_SESSION['user_id']} hat Level $selected_level ausgewählt.",
-                $_SESSION['level'],
-                null, 
-                $_POST['charakter'],
-                'Aktiv',
-                null  
-            );
+            // Log in die Datenbank einfügen
+            $stmt_insert = $conn->prepare("INSERT INTO nutzer_log (nutzer_id, aktion, level, punkte, charakter_id, login, status, details) VALUES (?, ?, ?, ?, ?, NOW(), ?, ?)");
+            if (!$stmt_insert) {
+                // Fehler beim Vorbereiten der SQL-Abfrage
+                die("Fehler bei der SQL-Abfrage: " . $conn->error);
+            }
+
+            $aktion = 'Level selection';
+            $punkte = $_SESSION['punkte'];
+            $charakter_id = $_SESSION['charakter'];
+            $status = 'Aktiv';
+            $details = "Benutzer {$_SESSION['user_id']} hat Level $selected_level ausgewählt.";
+
+            // Die aktuelle Zeit wird nun durch `NOW()` in der SQL-Abfrage automatisch gesetzt
+            $stmt_insert->bind_param("isiiiss", $nutzer_id, $aktion, $selected_level, $punkte, $charakter_id, $status, $details);
+            $stmt_insert->execute();
+            $stmt_insert->close();
         }
 
         $stmt_check->close();
@@ -65,48 +159,17 @@ if (isset($_GET['level'])) {
 $stmt = $conn->prepare("SELECT `name` FROM charaktere WHERE id = ?");
 $stmt->bind_param("i", $charakter);
 $stmt->execute();
-$stmt->bind_result($charakter);
+$stmt->bind_result($charakter_name);
 $stmt->fetch();
 $stmt->close();
 
-// Start der Transaktion (falls erforderlich, aber nicht für Levelauswahl nötig)
-$conn->begin_transaction();
-
-try {
-    // Bereite die SQL-Abfrage vor, um SQL-Injection zu vermeiden
-    $stmt = $conn->prepare("SELECT punkte FROM nutzer WHERE benutzername = ?");
-    $stmt->bind_param("s", $benutzername);  // "s" für String
-    $stmt->execute();
-    $stmt->bind_result($punkte);
-    $stmt->fetch();
-    $stmt->close();
-
-    if ($punkte === null) {
-        throw new Exception("Keine Punkte gefunden für den Benutzer.");
-    }
-
-    // Abfrage der Leveldaten (nicht zwingend notwendig, wenn nur die Auswahl protokolliert wird)
-    $level_status = [];
-    $stmt = $conn->prepare("SELECT level, punkte_bis FROM level_system ORDER BY level");
-    $stmt->execute();
-    $stmt->bind_result($level, $punkte_bis);
-
-    while ($stmt->fetch()) {
-        $level_status[$level] = ($punkte >= $punkte_bis);
-    }
-    $stmt->close();
-
-    // Commit der Transaktion
-    $conn->commit();
-} catch (Exception $e) {
-    // Falls ein Fehler auftritt, machen wir ein Rollback
-    $conn->rollback();
-    echo "Fehler: " . $e->getMessage();
-    exit();
-} finally {
-    // Verbindung schließen
-    $conn->close();
-}
+// Hole die aktuellen Punkte aus der nutzer_log-Tabelle
+$stmt = $conn->prepare("SELECT punkte FROM nutzer_log WHERE nutzer_id = ? ORDER BY id DESC LIMIT 1");
+$stmt->bind_param("i", $nutzer_id);  // "i" für Integer (nutzer_id ist eine Zahl)
+$stmt->execute();
+$stmt->bind_result($punkte);
+$stmt->fetch();
+$stmt->close();
 ?>
 
 <!DOCTYPE html>
@@ -162,16 +225,26 @@ try {
 </head>
 <body>
     <header>
+        <nav>
+            <ul>
+                <li><a href="start.php">Startseite</a></li>
+                <li><a href="deck.php">Mein Deck</a></li>
+                <li><a href="shop.php">Karten Shop</a></li>
+            </ul>
+        </nav>
+        <!-- Logout-Formular -->
+        <form action="start.php" method="POST">
+            <button type="submit" name="logout" class="btn">Abmelden</button>
+        </form>
         <h1>Willkommen zurück, <?php echo htmlspecialchars($benutzername); ?>!</h1>
-        <p>Du spielst als: <?php echo htmlspecialchars($charakter); ?></p>
-        <p>Deine aktuellen Punkte: <?php echo $punkte; ?></p>
+        <p>Du spielst als: <?php echo htmlspecialchars($charakter_name); ?></p>
+        <p>Deine aktuellen Punkte: <?php echo htmlspecialchars($punkte); ?></p>
     </header>
 
     <main>
         <section class="section">
             <div class="button-container">
                 <!-- LEVEL 1 immer aktiv, auch wenn der Benutzer keine Punkte hat -->
-
                 <button class="my-button1 <?php echo ($punkte >= 0) ? 'enabled' : 'disabled'; ?>" onclick="window.location.href='spiel.php?level=1';">LEVEL 1</button>
                 <button class="my-button2 <?php echo ($punkte >= 100) ? 'enabled' : 'disabled'; ?>" onclick="window.location.href='spiel.php?level=2';">LEVEL 2</button>
                 <button class="my-button3 <?php echo ($punkte >= 250) ? 'enabled' : 'disabled'; ?>" onclick="window.location.href='spiel.php?level=3';">LEVEL 3</button>
@@ -220,3 +293,8 @@ try {
     </footer>
 </body>
 </html>
+
+<?php
+// Schließe die Datenbankverbindung
+$conn->close();
+?>
