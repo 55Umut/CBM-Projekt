@@ -18,75 +18,79 @@ $success = "";
 
 // Wenn das Formular abgesendet wurde
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Benutzereingaben aus dem Formular
-    $email = $_POST['email'];
-    $passwort = $_POST['password'];
+    // Überprüfen, ob die E-Mail und das Passwort gesetzt sind
+    if (isset($_POST['email']) && isset($_POST['password'])) {
+        // Benutzereingaben aus dem Formular
+        $email = $_POST['email'];
+        $passwort = $_POST['password'];
 
-    // Starten einer Transaktion
-    $conn->begin_transaction();
+        // Der restliche Code bleibt gleich...
 
-    try {
-        // Überprüfen, ob die E-Mail und das Passwort korrekt sind
-        $sql = "SELECT * FROM nutzer WHERE email = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("s", $email);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        // Starten einer Transaktion
+        $conn->begin_transaction();
 
-        // Falls Benutzer gefunden wurde
-        if ($result->num_rows > 0) {
-            // Daten des Benutzers aus der Datenbank holen
-            $row = $result->fetch_assoc();
-            
-            // Überprüfen, ob das eingegebene Passwort mit dem gehashten Passwort übereinstimmt
-            if (password_verify($passwort, $row['passwort'])) {
-                // Erfolg: Benutzer eingeloggt, Session starten und zum Dashboard weiterleiten
-                session_start();
-                $_SESSION['user_id'] = $row['id'];
-                $_SESSION['benutzername'] = $row['benutzername'];
-                $_SESSION['email'] = $row['email'];
+        try {
+            // Überprüfen, ob die E-Mail und das Passwort korrekt sind
+            $sql = "SELECT * FROM nutzer WHERE email = ?";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("s", $email);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            // Falls Benutzer gefunden wurde
+            if ($result->num_rows > 0) {
+                // Daten des Benutzers aus der Datenbank holen
+                $row = $result->fetch_assoc();
                 
-                // Commit der Transaktion, falls alles erfolgreich war
-                $conn->commit();
-                  // **Einbinden der NutzerLog-Klasse**
-                require_once 'nutzerlog.php'; // Achte darauf, dass der Pfad zur Datei stimmt
+                // Überprüfen, ob das eingegebene Passwort mit dem gehashten Passwort übereinstimmt
+                if (password_verify($passwort, $row['passwort'])) {
+                    // Erfolg: Benutzer eingeloggt, Session starten und zum Dashboard weiterleiten
+                    session_start();
+                    $_SESSION['user_id'] = $row['id'];
+                    $_SESSION['benutzername'] = $row['benutzername'];
+                    $_SESSION['email'] = $row['email'];
+                    
+                    // Commit der Transaktion, falls alles erfolgreich war
+                    $conn->commit();
 
-                // Instanz von NutzerLog für Tracking erstellen
-                $nutzerLog = new NutzerLog($servername, $username, $password, $dbname);
-                
-                // Action und Details für den Logeintrag festlegen
-                $action = 'Login';
-                $details = 'Erfolgreich eingeloggt mit der E-Mail ' . $email; // Zusätzliche Details
+                    // **Einbinden der NutzerLog-Klasse**
+                    require_once 'nutzerlog.php'; // Achte darauf, dass der Pfad zur Datei stimmt
 
-                // Logeintrag in die Datenbank einfügen
-                if ($nutzerLog->insertLog($_SESSION['user_id'], $action, $details)) {
-                    // Logeintrag erfolgreich gespeichert
+                    // Instanz von NutzerLog für Tracking erstellen
+                    $nutzerLog = new NutzerLog($servername, $username, $password, $dbname);
+                    
+                    // Action und Details für den Logeintrag festlegen
+                    $action = 'Login';
+                    $details = 'Erfolgreich eingeloggt mit der E-Mail ' . $email; // Zusätzliche Details
+
+                    // Logeintrag in die Datenbank einfügen
+                    if ($nutzerLog->insertLog($_SESSION['user_id'], $action, $details)) {
+                        // Logeintrag erfolgreich gespeichert
+                    } else {
+                        $error = "Fehler beim Speichern des Logeintrags.";
+                    }
+
+                    // Weiterleitung zur Startseite (z.B. abenteuer.php)
+                    header("Location: abenteuer.php");
+                    exit();
                 } else {
-                    $error = "Fehler beim Speichern des Logeintrags.";
+                    $error = "Ungültige E-Mail oder Passwort!";
                 }
-
-                // Weiterleitung zur Startseite (z.B. abenteuer.php)
-                header("Location: abenteuer.php");
-                exit();
-                // Weiterleitung zur Startseite (z.B. projekt.php oder abenteuer.php)
-                header("Location: abenteuer.php");
-                exit();
             } else {
                 $error = "Ungültige E-Mail oder Passwort!";
             }
-        } else {
-            $error = "Ungültige E-Mail oder Passwort!";
-        }
 
-        // Wenn ein Fehler auftritt, Transaktion zurückrollen
-        if (!empty($error)) {
+            // Wenn ein Fehler auftritt, Transaktion zurückrollen
+            if (!empty($error)) {
+                $conn->rollback();
+            }
+
+        } catch (Exception $e) {
+            // Falls ein Fehler auftritt, wird die Transaktion zurückgerollt
             $conn->rollback();
+            $error = "Ein Fehler ist aufgetreten. Bitte versuche es später erneut.";
         }
 
-    } catch (Exception $e) {
-        // Falls ein Fehler auftritt, wird die Transaktion zurückgerollt
-        $conn->rollback();
-        $error = "Ein Fehler ist aufgetreten. Bitte versuche es später erneut.";
     }
 }
 
@@ -123,11 +127,11 @@ $conn->close();
             <form action="login.php" method="POST">
                 <div class="input-group">
                     <label for="email">E-Mail:</label>
-                    <input type="email" id="email" name="email" required placeholder="Deine E-Mail">
+                    <input type="email" id="email" name="email" placeholder="Deine E-Mail">
                 </div>
                 <div class="input-group">
                     <label for="password">Passwort:</label>
-                    <input type="password" id="password" name="password" required placeholder="Dein Passwort">
+                    <input type="password" id="password" name="password" placeholder="Dein Passwort">
                 </div>
                 <button type="submit" class="btn">Einloggen</button>
             </form>

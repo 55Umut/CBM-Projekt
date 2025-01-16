@@ -273,6 +273,7 @@ footer p {
   margin: 0;
   font-size: 1rem;
 }
+/* Standard-Stile für das article */
 article {
   display: none; /* Standardmäßig versteckt */
   padding: 20px;
@@ -284,18 +285,30 @@ article {
   border-radius: 10px;
 }
 
+/* Wenn show-message gesetzt ist, wird der Artikel angezeigt */
 article.show-message {
   display: block; /* Nur anzeigen, wenn die Klasse 'show-message' gesetzt ist */
+  background-color: #34495e; /* Ein leicht dunklerer Hintergrund für den Artikel */
+  color: white; /* Weißer Text für den Artikel */
 }
 
+/* Stil für den Sieg (goldene Farbe) */
 article p {
   color: #f1c40f; /* Goldene Farbe für den Sieg */
   background-color: #2c3e50; /* Dunkler Hintergrund */
   border-radius: 10px;
   padding: 10px;
+  margin: 10px 0; /* Etwas Abstand zwischen den Paragraphen */
 }
 
+/* Stil für die Niederlage (rote Farbe) */
 article p:first-of-type {
   color: #e74c3c; /* Rote Farbe für den Verlust */
+  background-color: #2c3e50; /* Dunkler Hintergrund */
+}
+
+/* Optional: Für den Fall, dass du einen allgemeinen Stil für das zweite P-Tag brauchst */
+article p:nth-of-type(2) {
+  color: #f1c40f; /* Goldene Farbe für den Sieg */
   background-color: #2c3e50; /* Dunkler Hintergrund */
 }

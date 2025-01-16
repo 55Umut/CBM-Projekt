@@ -159,7 +159,10 @@ if (isset($_POST['charakter'])) {
     </style>
 </head>
 <body>
-    <!-- Wolken-Background -->
+    <audio id="background-audio" preload="auto">
+        <source src="CHOOSE.mp3" type="audio/mp3">
+        Dein Browser unterstützt das Abspielen von Audio nicht.
+    </audio>
     <div class="clouds">
         <div class="clouds-1"></div>
         <div class="clouds-2"></div>
@@ -170,20 +173,17 @@ if (isset($_POST['charakter'])) {
         <!-- Navigation -->
         <nav>
             <ul>
-                <li><a href="start.php">Startseite</a></li>
-                <li><a href="deck.php">Mein Deck</a></li>
-                <li><a href="shop.php">Karten Shop</a></li>
+               <li><a href="abenteuer.php">Startseite</a></li>
+                <li><a href="charaktere.php">Meine Charaktere</a></li>
+                <li><a href="highscore.php">Highscore</a></li>
             </ul>
         </nav>
-        <!-- Logout-Formular -->
-        <form action="start.php" method="POST">
+        <form action="login.php" method="POST">
             <button type="submit" name="logout" class="btn">Abmelden</button>
         </form>
     </header>
-
     <main>
         <div class="container">
-            <!-- Charakter Auswahl -->
             <section class="charaktere-container">
                 <h2>Wähle einen der folgenden Charaktere:</h2>
                 <form action="abenteuer.php" method="POST">
@@ -201,8 +201,6 @@ if (isset($_POST['charakter'])) {
                     <button type="submit" class="btn">Bestätigen</button>
                 </form>
             </section>
-
-            <!-- Highscore Tabelle -->
             <section class="highscore-container">
                 <h2>Highscore</h2>
                 <table>
@@ -217,9 +215,8 @@ if (isset($_POST['charakter'])) {
                     </thead>
                     <tbody>
                         <?php
-                        // Ausgabe der Highscore-Daten
                         if (count($highscores) > 0) {
-                            $position = 1; // Startposition für das Ranking
+                            $position = 1;
                             foreach ($highscores as $highscore) {
                                 $datum = new DateTime($highscore['registriert_am']);
                                 echo "<tr>";
@@ -239,9 +236,22 @@ if (isset($_POST['charakter'])) {
             </section>
         </div>
     </main>
-
    <footer>
-        <p>&copy; 2025 Codebreakers - Battle of Minds Trading Card Game - Alle Rechte vorbehalten.</p>
+        <p>&copy; 2025 Codebreakers - Battle of Minds Game - Alle Rechte vorbehalten.</p>
     </footer>
+    <script>
+        // Funktion zum Abspielen des Audios beim Laden der Seite
+        window.onload = function() {
+            var audio = document.getElementById('background-audio');
+            // Versuchen, das Audio ohne Benutzerinteraktion abzuspielen
+            audio.play().catch(function(error) {
+                // Falls das Abspielen blockiert wurde, simulieren wir eine Benutzerinteraktion
+                var div = document.createElement('div');
+                div.style.display = 'none';
+                document.body.appendChild(div);
+                div.click();
+            });
+        };
+    </script>
 </body>
 </html>
