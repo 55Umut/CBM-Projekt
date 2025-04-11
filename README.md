@@ -1,7 +1,7 @@
-# 🎉 CBM-Projekt | Dein Weg zu PHP, HTML und CSS
+# 🎉 CBM-Projekt | Mein Weg zu PHP, HTML und CSS - Projekt Codebreakers
 
 <div align="center">
-  <img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&size=32&duration=3000&pause=1000&color=2F81F7&center=true&vCenter=true&width=600&lines=Willkommen+zum+CBM-Projekt;Lernen+mit+PHP%2C+HTML+und+CSS;Webseiten+Erstellen+und+Verstehen;Mach+deine+ersten+Schritte!" alt="Typing SVG" />
+  <img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&size=32&duration=3000&pause=1000&color=2F81F7&center=true&vCenter=true&width=600&lines=Willkommen+zum+CBM-Projekt;Mein+PHP%2C+HTML+und+CSS;Codebreakers - Battle of Minds;Meine+ersten+versuche!" alt="Typing SVG" />
 </div>
 
 ---
@@ -10,9 +10,20 @@
 
 In diesem Repository dokumentieren wir unseren Lernprozess, bei dem wir **PHP**, **HTML**, und **CSS** erlernen. Das Ziel ist es, durch die Erstellung einer Website grundlegende **PHP-Techniken** und **Frontend-Design** zu verstehen und anzuwenden.
 
-🎯 **Ziel**: Am Ende des Projekts haben wir eine funktionierende Webseite mit PHP für die Backend-Logik und HTML/CSS für das Frontend erstellt.
-
 ---
+
+## 📁 Projektstruktur
+
+```bash
+CBM-Projekt/
+├── index.php            # Startseite der Webseite
+├── login.php            # Login-Seite
+├── projekt.php          # Hauptprojekt-Seite
+├── config.php           # Konfigurationsdatei für Datenbank und Sessions
+├── styles.css           # Haupt-CSS-Datei
+├── styles1.css          # Weitere CSS-Dateien für Design
+├── resources/           # Ressourcen für Bilder und Dateien
+└── README.md            # Dieses Dokument
 
 ## 🧰 Was du benötigst
 
@@ -33,30 +44,12 @@ In diesem Projekt werden wir uns auf folgende Lernziele konzentrieren:
 
 ---
 
-## 📅 Zeitplan
-
-- **Tag 1**: Einführung in PHP, HTML und CSS; Erstellen der ersten PHP-Datei
-- **Woche 1-2**: Aufbau des Webprojekts, Anwendung von PHP und Erstellung von HTML-Seiten
-- **Woche 3**: Verfeinerung der Benutzeroberfläche mit CSS, Einbindung von interaktiven Funktionen mit JavaScript
-
----
-
 ## 🧠 Lernziele
 
 - ✅ Verstehen von PHP, HTML und CSS  
 - ✅ Arbeiten mit Formularen und Sessions in PHP  
 - 🟡 Entwicklung einer voll funktionsfähigen Webseite  
 - 🟡 Einführung in JavaScript zur Interaktivität  
-
----
-
-## 📚 Nützliche Ressourcen
-
-- 📂 Siehe den Ordner `Ressourcen/` (PDF & DOCX)  
-- 🌐 [PHP Docs](https://www.php.net/docs.php)  
-- 🌐 [MDN Web Docs - HTML](https://developer.mozilla.org/en-US/docs/Web/HTML)  
-- 🌐 [CSS-Tricks](https://css-tricks.com/)  
-- 📹 YouTube Tutorials zu PHP und Webentwicklung  
 
 ---
 
@@ -92,17 +85,3 @@ In diesem Projekt werden wir uns auf folgende Lernziele konzentrieren:
   <i>Feedback & Pull Requests sind jederzeit willkommen!</i>
 </div>
 
----
-
-## 📁 Projektstruktur
-
-```bash
-CBM-Projekt/
-├── index.php            # Startseite der Webseite
-├── login.php            # Login-Seite
-├── projekt.php          # Hauptprojekt-Seite
-├── config.php           # Konfigurationsdatei für Datenbank und Sessions
-├── styles.css           # Haupt-CSS-Datei
-├── styles1.css          # Weitere CSS-Dateien für Design
-├── resources/           # Ressourcen für Bilder und Dateien
-└── README.md            # Dieses Dokument
