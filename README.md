@@ -1,7 +1,6 @@
 # 🎉 CBM-Projekt | Mein Weg zu PHP, HTML und CSS - Projekt Codebreakers
-
 <div align="center">
-  <img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&size=32&duration=3000&pause=1000&color=2F81F7&center=true&vCenter=true&width=600&lines=Willkommen+zum+CBM-Projekt;Mein+PHP%2C+HTML+und+CSS;Codebreakers - Battle of Minds;Meine+ersten+versuche!" alt="Typing SVG" />
+  <img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&size=32&duration=3000&pause=1000&color=2F81F7&center=true&vCenter=true&width=600&lines=Hello+World!;Willkommen+auf+meinem+Profil;Coding+%26+Learning;Python+und+C%23+Enthusiast;Immer+am+Lernen+und+Wachsen" alt="Typing SVG" />
 </div>
 
 ---
